@@ -8,16 +8,28 @@ NS_ASSUME_NONNULL_BEGIN
 @interface OpenALSupport : NSObject
 
 #pragma mark - 环境
--(void)initAL;
--(void)closeAL;
++(void)initAL;
++(void)closeAL;
 
 #pragma mark - 获取数据源信息工具
--(ExtAudioFileRef)openExtAudioFile:(CFURLRef)FileURL;
--(ALenum)getDataFormat:(ExtAudioFileRef)fileID;
--(ALsizei)getDataSize:(ExtAudioFileRef)fileID;
--(ALsizei)getDataSampleRate:(ExtAudioFileRef)fileID;
++(ExtAudioFileRef)openExtAudioFile:(CFURLRef)FileURL;
++(ALenum)getDataFormat:(ExtAudioFileRef)fileID;
++(ALsizei)getDataSize:(ExtAudioFileRef)fileID;
++(ALsizei)getDataSampleRate:(ExtAudioFileRef)fileID;
 
-void* MyGetOpenALAudioData(CFURLRef inFileURL, ALsizei *outDataSize, ALenum *outDataFormat, ALsizei*    outSampleRate);
++(AudioFileID)openAudioFile:(NSURL*)filePath;
++(UInt32)audioFileSize:(AudioFileID)fileID;
++(UInt32)audioFileFormat:(AudioFileID)fileID;
+
++(OSStatus)AudioFileToBuffer:(const NSString*)filePath
+               //  AudioFileID:(AudioFileID*)fileID
+                      format:(ALenum*)format
+                   audioData:(ALvoid**)data
+                    dataSize:(UInt32*)size
+                  SampleRate:(ALsizei*)freq;
+
+
+static void* MyGetOpenALAudioData(CFURLRef inFileURL, ALsizei *outDataSize, ALenum *outDataFormat, ALsizei*    outSampleRate);
 
 
 @end

@@ -6,20 +6,28 @@
     [super viewDidLoad];
     
 }
+-(void)viewWillDisappear:(BOOL)animated{
+    [super viewWillDisappear:animated];
+    // [OpenALSupport closeAL];
+}
 
-//获取数据信息
--(void) getDataInfo{
-    NSString* filePath=@"/Users/Batu/MyData/OpenAL/media/Footsteps.wav";
-    CFURLRef fileURL = CFURLCreateWithString(kCFAllocatorDefault, (CFStringRef)filePath, NULL);
-    OpenALSupport* als = [[OpenALSupport alloc]init];
-    [als initAL];
-    ExtAudioFileRef fileID = [als openExtAudioFile:fileURL];
-    ALenum dataFormat = [als getDataFormat:fileID];
-    ALsizei dataSize = [als getDataSize:fileID];
-    ALsizei dataSampleRate = [als getDataSampleRate:fileID];
+- (IBAction)onPlay:(id)sender {
+    [OpenALSupport initAL];
+    AudioFileID fileID;
+    UInt32 audioSize;
+    ALvoid* audioData;
+    ALenum format;
+    ALsizei freq;
+    ALuint bid;
+    ALuint sid;
+    
+    [OpenALSupport AudioFileToBuffer:@"/Users/Batu/Music/media/Footsteps.wav" format:&format audioData:&audioData dataSize:&audioSize SampleRate:&freq];
 
-    NSLog(@"fileID: %d, dataFormat: %d, dataSize: %d, dataSampleRate: %d ",(uint)fileID,dataFormat,dataSize,dataSampleRate);
-    [als closeAL];
+    alGenBuffers(1, &bid);
+    alBufferData(bid, format, audioData, audioSize, freq);
+    alGenSources(1, &sid);
+    alSourcei(sid, AL_BUFFER, bid);
+    alSourcePlay(sid);
 }
 
 @end

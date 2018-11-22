@@ -2,7 +2,7 @@
 
 @implementation OpenALSupport
 
--(void)initAL{
++(void)initAL{
     ALCcontext *newContext = NULL;
     ALCdevice *newDevice = NULL;
     newDevice = alcOpenDevice(NULL);
@@ -13,7 +13,7 @@
         }
     }
 }
--(void)closeAL{
++(void)closeAL{
     ALCcontext *context = alcGetCurrentContext();
     ALCdevice *device = alcGetContextsDevice(context);
     alcMakeContextCurrent(NULL);
@@ -22,7 +22,7 @@
 }
 
 // By ExtndedAudioFile.h
--(ExtAudioFileRef)openExtAudioFile:(CFURLRef)FileURL{
++(ExtAudioFileRef) openExtAudioFile:(CFURLRef)FileURL{
     ExtAudioFileRef fileID;
     OSStatus err = noErr;
     err = ExtAudioFileOpenURL(FileURL, &fileID);
@@ -32,7 +32,7 @@
     }
     return fileID;
 }
--(ALenum)getDataFormat:(ExtAudioFileRef)fileID{
++(ALenum)getDataFormat:(ExtAudioFileRef)fileID{
     OSStatus err = noErr;
     AudioStreamBasicDescription audioDataInfo;
     UInt32 propertySize = sizeof(audioDataInfo);
@@ -47,7 +47,7 @@
     }
     return audioDataInfo.mChannelsPerFrame > 1 ? AL_FORMAT_STEREO16 : AL_FORMAT_MONO16;
 }
--(ALsizei)getDataSize:(ExtAudioFileRef)fileID{
++(ALsizei)getDataSize:(ExtAudioFileRef)fileID{
     OSStatus err = noErr;
     SInt64 theFileLengthInFrames = 0;
     UInt32 thePropSize = sizeof(theFileLengthInFrames);
@@ -58,7 +58,7 @@
     }
     return (ALsizei)theFileLengthInFrames;
 }
--(ALsizei)getDataSampleRate:(ExtAudioFileRef)fileID{
++(ALsizei)getDataSampleRate:(ExtAudioFileRef)fileID{
     OSStatus err = noErr;
     AudioStreamBasicDescription audioDataInfo;
     UInt32 propertySize = sizeof(audioDataInfo);
@@ -70,8 +70,8 @@
     return audioDataInfo.mSampleRate;
 }
 
-// By AudioFile.h
--(AudioFileID)openAudioFile:(NSURL*)filePath{
+// By AudioFile.h~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
++(AudioFileID)openAudioFile:(NSURL*)filePath{
     AudioFileID outAFID;
     OSStatus err = noErr;
     err = AudioFileOpenURL(
@@ -85,12 +85,10 @@
     }
     return outAFID;
 }
-
--(UInt32)audioFileSize:(AudioFileID)fileID
-{
++(UInt32)audioFileSize:(AudioFileID)fileID{
+    OSStatus err = noErr;
     UInt64 outDataSize = 0;
     UInt32 thePropSize = sizeof(UInt64);
-    OSStatus err = noErr;
     err = AudioFileGetProperty(fileID,
                                kAudioFilePropertyAudioDataByteCount,
                                &thePropSize,
@@ -101,9 +99,72 @@
     }
     return (UInt32)outDataSize;
 }
++(UInt32)audioFileFormat:(AudioFileID)fileID{
+    OSStatus err = noErr;
+    AudioStreamBasicDescription audioDataInfo;
+    UInt32 thePropSize = sizeof(audioDataInfo);
+    err = AudioFileGetProperty(fileID,
+                               kAudioFilePropertyDataFormat,
+                               &thePropSize,
+                               &audioDataInfo);
+    if(err){
+        NSLog(@"AudioFileGetProperty(kAudioFilePropertyDataFormat) FAILED, Error = %d",err);
+        return 0;
+    }
+    return (UInt32)audioDataInfo.mChannelsPerFrame > 1 ? AL_FORMAT_STEREO16 : AL_FORMAT_MONO16;
+}
 
++(OSStatus)AudioFileToBuffer:(NSString*)filePath
+               //  AudioFileID:(AudioFileID*)fileID
+                      format:(ALenum*)format
+                   audioData:(ALvoid**)data
+                    dataSize:(UInt32*)size
+                  SampleRate:(ALsizei*)freq{
+    
+    OSStatus err = noErr;
+   AudioFileID fileID = [OpenALSupport openAudioFile:[NSURL URLWithString:filePath]];
+    if(fileID == nil) return -1;
+    
+    //audioDataSize
+    UInt32 thePropSize = sizeof(size);
+    err = AudioFileGetProperty(fileID,
+                               kAudioFilePropertyAudioDataByteCount,
+                               &thePropSize,
+                               size);
+    if(err) return -1;
+    
+    //format & freq
+    AudioStreamBasicDescription audioDataInfo;
+    thePropSize = sizeof(audioDataInfo);
+    err = AudioFileGetProperty(fileID,
+                               kAudioFilePropertyDataFormat,
+                               &thePropSize,
+                               &audioDataInfo);
+    *freq = audioDataInfo.mSampleRate;
+    if(audioDataInfo.mBitsPerChannel == 8 && audioDataInfo.mChannelsPerFrame == 1){
+        *format = AL_FORMAT_MONO8;//8位单通道
+    }else if(audioDataInfo.mBitsPerChannel == 8 && audioDataInfo.mChannelsPerFrame == 2){
+        *format = AL_FORMAT_STEREO8;//8位双通道
+    }else if(audioDataInfo.mBitsPerChannel == 16 && audioDataInfo.mChannelsPerFrame == 1){
+        *format = AL_FORMAT_MONO16;//16位单通道
+    }else if(audioDataInfo.mBitsPerChannel == 16 && audioDataInfo.mChannelsPerFrame == 2){
+        *format = AL_FORMAT_STEREO16;//16位双通道
+    }else{
+        return -1;//不能识别
+    }
+    
+    //data
+    *data = malloc(*size);
+    err = AudioFileReadBytes(fileID, false, 0, size, *data);
+//    AudioFileClose(fileID);
+//    free(*data);
+    
+    if(err) return -1;
+    return 0;
+}
 
-void* MyGetOpenALAudioData(CFURLRef inFileURL, ALsizei *outDataSize, ALenum *outDataFormat, ALsizei*    outSampleRate)
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+static void* MyGetOpenALAudioData(CFURLRef inFileURL, ALsizei *outDataSize, ALenum *outDataFormat, ALsizei*    outSampleRate)
 {
     OSStatus                        err = noErr;
     SInt64                            theFileLengthInFrames = 0;
