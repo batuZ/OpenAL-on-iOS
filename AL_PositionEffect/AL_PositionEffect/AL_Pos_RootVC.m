@@ -48,7 +48,7 @@
     // 设置源属性
     alSourcei(sid,AL_LOOPING, AL_TRUE); //循环播放
     alSourcef(sid,AL_MAX_DISTANCE, 200.0f);
-    alSourcef(sid,AL_REFERENCE_DISTANCE, 100.0f);
+    alSourcef(sid,AL_REFERENCE_DISTANCE, 50.0f);
     [self setSource];
 }
 -(void)setSource{
@@ -56,7 +56,7 @@
     alSourcefv(sid,AL_POSITION,sourcePos);
 }
 -(void)setListener{
-    ALfloat listenerPos[]={_listener.frame.origin.x,_listener.frame.origin.y,-1};
+    ALfloat listenerPos[]={_listener.frame.origin.x,_listener.frame.origin.y,20};
     ALfloat listenerOri[]={0,0,-1,0,1,0};
     alListenerfv(AL_POSITION,listenerPos);
     alListenerfv(AL_ORIENTATION,listenerOri);
@@ -83,5 +83,50 @@
     float x = sx - lx;
     float y = ly - sy;
     NSLog(@"Sound: x=%f,y=%f",x,y);
+}
+
+//测试混响
+-(void)test{
+    
+    alcASASetSourceProcPtr sourceSetProc = (alcASASetSourceProcPtr)alcGetProcAddress(NULL, "alcASASetSource");
+    
+    // Source_Rendering_Quality(sid,ALC_IPHONE_SPATIAL_RENDERING_QUALITY_HEADPHONES);
+    //type ALfloat    0.0 (dry) - 1.0 (wet) (0-100% dry/wet mix, 0.0 default)
+    ALfloat val_4 = 0.5;
+    sourceSetProc(ALC_ASA_REVERB_SEND_LEVEL,sid,&val_4,sizeof(val_4));
+    
+    // type ALfloat    -100.0 db (most occlusion) - 0.0 db (no occlusion, 0.0 default)
+    ALfloat val_5 = -55;
+    sourceSetProc(ALC_ASA_OCCLUSION,sid,&val_5,sizeof(val_5));
+    
+    // type ALfloat    -100.0 db (most obstruction) - 0.0 db (no obstruction, 0.0 default)
+    ALfloat val_6 = -55;
+    sourceSetProc(ALC_ASA_OBSTRUCTION,sid,&val_6,sizeof(val_6));
+    
+    
+    
+    
+    alcASASetListenerProcPtr setProc = (alcASASetListenerProcPtr)alcGetProcAddress(NULL, "alcASASetListener");
+    alcASAGetListenerProcPtr getProc = (alcASAGetListenerProcPtr) alcGetProcAddress(NULL, "alcASAGetListener");
+    
+    ALboolean value = AL_TRUE;
+    ALfloat _value = 20;
+    ALenum value_ = ALC_ASA_REVERB_ROOM_TYPE_LargeHall2;
+    setProc(ALC_ASA_REVERB_ON,&value,sizeof(value));
+    setProc(ALC_ASA_REVERB_GLOBAL_LEVEL,&_value,sizeof(_value));
+    setProc(ALC_ASA_REVERB_ROOM_TYPE,&value_,sizeof(value_));
+    
+    ALfloat val_1 = 2.2;
+    setProc(ALC_ASA_REVERB_EQ_GAIN,&val_1,sizeof(val_1));
+    ALfloat val_2 = 2.2;
+    setProc(ALC_ASA_REVERB_EQ_BANDWITH,&val_2,sizeof(val_2));
+    ALfloat val_3 = 3.2;
+    setProc(ALC_ASA_REVERB_EQ_FREQ,&val_3,sizeof(val_3));
+    
+    ALfloat res;
+    ALuint resSz;
+    getProc(ALC_ASA_REVERB_EQ_GAIN,&res,&resSz);
+    getProc(ALC_ASA_REVERB_EQ_BANDWITH,&res,&resSz);
+    getProc(ALC_ASA_REVERB_EQ_FREQ,&res,&resSz);
 }
 @end

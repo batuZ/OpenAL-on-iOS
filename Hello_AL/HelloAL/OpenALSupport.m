@@ -24,10 +24,10 @@
 
 +(OSStatus)openAudioFile:(NSURL*)filePath AudioFileID:(AudioFileID*)fileID{
     OSStatus  err = AudioFileOpenURL(
-                           (__bridge CFURLRef)filePath,
-                           kAudioFileReadPermission,
-                           0,
-                           fileID);
+                                     (__bridge CFURLRef)filePath,
+                                     kAudioFileReadPermission,
+                                     0,
+                                     fileID);
     return err;
 }
 +(OSStatus)audioFileSize:(AudioFileID)fileID Size:(UInt32*)size{
@@ -59,6 +59,13 @@
         return -1;//不能识别
     }
     return err;
+}
+
++(ALvoid)Rendering_Quality:(ALint)value{
+    static alcMacOSXRenderingQualityProcPtr Rendering_Quality = NULL;
+    if(Rendering_Quality == NULL)
+        Rendering_Quality = (alcMacOSXRenderingQualityProcPtr)alcGetProcAddress(NULL, "alcMacOSXRenderingQuality");
+    return Rendering_Quality(value);
 }
 @end
 
