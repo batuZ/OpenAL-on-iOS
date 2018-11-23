@@ -12,26 +12,9 @@ NS_ASSUME_NONNULL_BEGIN
 +(void)closeAL;
 
 #pragma mark - 获取数据源信息工具
-+(ExtAudioFileRef)openExtAudioFile:(CFURLRef)FileURL;
-+(ALenum)getDataFormat:(ExtAudioFileRef)fileID;
-+(ALsizei)getDataSize:(ExtAudioFileRef)fileID;
-+(ALsizei)getDataSampleRate:(ExtAudioFileRef)fileID;
-
-+(AudioFileID)openAudioFile:(NSURL*)filePath;
-+(UInt32)audioFileSize:(AudioFileID)fileID;
-+(UInt32)audioFileFormat:(AudioFileID)fileID;
-
-+(OSStatus)AudioFileToBuffer:(const NSString*)filePath
-               //  AudioFileID:(AudioFileID*)fileID
-                      format:(ALenum*)format
-                   audioData:(ALvoid**)data
-                    dataSize:(UInt32*)size
-                  SampleRate:(ALsizei*)freq;
-
-
-static void* MyGetOpenALAudioData(CFURLRef inFileURL, ALsizei *outDataSize, ALenum *outDataFormat, ALsizei*    outSampleRate);
-
-
++(OSStatus)openAudioFile:(NSURL*)filePath AudioFileID:(AudioFileID*)fileID;
++(OSStatus)audioFileSize:(AudioFileID)fileID Size:(UInt32*)size;
++(OSStatus)audioFileFormat:(AudioFileID)fileID format:(ALenum*)format SampleRate:(ALsizei*)freq;
 @end
 
 NS_ASSUME_NONNULL_END

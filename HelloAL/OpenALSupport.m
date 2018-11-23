@@ -21,224 +21,44 @@
     alcCloseDevice(device);
 }
 
-// By ExtndedAudioFile.h
-+(ExtAudioFileRef) openExtAudioFile:(CFURLRef)FileURL{
-    ExtAudioFileRef fileID;
-    OSStatus err = noErr;
-    err = ExtAudioFileOpenURL(FileURL, &fileID);
-    if(err){
-        NSLog(@"ExtAudioFileOpenURL FAILED, Error = %d",err);
-        fileID = nil;
-    }
-    return fileID;
-}
-+(ALenum)getDataFormat:(ExtAudioFileRef)fileID{
-    OSStatus err = noErr;
-    AudioStreamBasicDescription audioDataInfo;
-    UInt32 propertySize = sizeof(audioDataInfo);
-    err = ExtAudioFileGetProperty(fileID, kExtAudioFileProperty_FileDataFormat, &propertySize, &audioDataInfo);
-    if(err){
-        NSLog(@"ExtAudioFileGetProperty(kExtAudioFileProperty_FileDataFormat) FAILED, Error = %d",err);
-        return -1;
-    }
-    if(audioDataInfo.mChannelsPerFrame>2){//每帧数据中的通道数。
-        NSLog(@"Unsupported Format, channel count is greater than stereo");
-        return -1;
-    }
-    return audioDataInfo.mChannelsPerFrame > 1 ? AL_FORMAT_STEREO16 : AL_FORMAT_MONO16;
-}
-+(ALsizei)getDataSize:(ExtAudioFileRef)fileID{
-    OSStatus err = noErr;
-    SInt64 theFileLengthInFrames = 0;
-    UInt32 thePropSize = sizeof(theFileLengthInFrames);
-    err = ExtAudioFileGetProperty(fileID, kExtAudioFileProperty_FileLengthFrames, &thePropSize, &theFileLengthInFrames);
-    if(err){
-        NSLog(@"ExtAudioFileGetProperty(kExtAudioFileProperty_FileLengthFrames) FAILED, Error = %d",err);
-        return -1;
-    }
-    return (ALsizei)theFileLengthInFrames;
-}
-+(ALsizei)getDataSampleRate:(ExtAudioFileRef)fileID{
-    OSStatus err = noErr;
-    AudioStreamBasicDescription audioDataInfo;
-    UInt32 propertySize = sizeof(audioDataInfo);
-    err = ExtAudioFileGetProperty(fileID, kExtAudioFileProperty_FileDataFormat, &propertySize, &audioDataInfo);
-    if(err){
-        NSLog(@"ExtAudioFileGetProperty(kExtAudioFileProperty_FileDataFormat) FAILED, Error = %d",err);
-        return -1;
-    }
-    return audioDataInfo.mSampleRate;
-}
 
-// By AudioFile.h~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-+(AudioFileID)openAudioFile:(NSURL*)filePath{
-    AudioFileID outAFID;
-    OSStatus err = noErr;
-    err = AudioFileOpenURL(
++(OSStatus)openAudioFile:(NSURL*)filePath AudioFileID:(AudioFileID*)fileID{
+    OSStatus  err = AudioFileOpenURL(
                            (__bridge CFURLRef)filePath,
                            kAudioFileReadPermission,
                            0,
-                           &outAFID);
-    if(err){
-        NSLog(@"AudioFileOpenURL FAILED, Error = %d",err);
-        return nil;
-    }
-    return outAFID;
+                           fileID);
+    return err;
 }
-+(UInt32)audioFileSize:(AudioFileID)fileID{
-    OSStatus err = noErr;
++(OSStatus)audioFileSize:(AudioFileID)fileID Size:(UInt32*)size{
     UInt64 outDataSize = 0;
     UInt32 thePropSize = sizeof(UInt64);
-    err = AudioFileGetProperty(fileID,
-                               kAudioFilePropertyAudioDataByteCount,
-                               &thePropSize,
-                               &outDataSize);
-    if(err){
-        NSLog(@"AudioFileGetProperty(kAudioFilePropertyAudioDataByteCount) FAILED, Error = %d",err);
-        return 0;
-    }
-    return (UInt32)outDataSize;
+    OSStatus err = AudioFileGetProperty(fileID, kAudioFilePropertyAudioDataByteCount, &thePropSize, &outDataSize);
+    if(err) return err;
+    *size = (UInt32)outDataSize;
+    return err;
 }
-+(UInt32)audioFileFormat:(AudioFileID)fileID{
++(OSStatus)audioFileFormat:(AudioFileID)fileID format:(ALenum*)format SampleRate:(ALsizei*)freq{
     OSStatus err = noErr;
-    AudioStreamBasicDescription audioDataInfo;
-    UInt32 thePropSize = sizeof(audioDataInfo);
-    err = AudioFileGetProperty(fileID,
-                               kAudioFilePropertyDataFormat,
-                               &thePropSize,
-                               &audioDataInfo);
-    if(err){
-        NSLog(@"AudioFileGetProperty(kAudioFilePropertyDataFormat) FAILED, Error = %d",err);
-        return 0;
-    }
-    return (UInt32)audioDataInfo.mChannelsPerFrame > 1 ? AL_FORMAT_STEREO16 : AL_FORMAT_MONO16;
-}
-
-+(OSStatus)AudioFileToBuffer:(NSString*)filePath
-               //  AudioFileID:(AudioFileID*)fileID
-                      format:(ALenum*)format
-                   audioData:(ALvoid**)data
-                    dataSize:(UInt32*)size
-                  SampleRate:(ALsizei*)freq{
+    AudioStreamBasicDescription info;
+    UInt32 pSize = sizeof(info);
+    err = AudioFileGetProperty(fileID, kAudioFilePropertyDataFormat, &pSize, &info);
+    if(err) return err;
     
-    OSStatus err = noErr;
-   AudioFileID fileID = [OpenALSupport openAudioFile:[NSURL URLWithString:filePath]];
-    if(fileID == nil) return -1;
+    *freq = info.mSampleRate;
     
-    //audioDataSize
-    UInt32 thePropSize = sizeof(size);
-    err = AudioFileGetProperty(fileID,
-                               kAudioFilePropertyAudioDataByteCount,
-                               &thePropSize,
-                               size);
-    if(err) return -1;
-    
-    //format & freq
-    AudioStreamBasicDescription audioDataInfo;
-    thePropSize = sizeof(audioDataInfo);
-    err = AudioFileGetProperty(fileID,
-                               kAudioFilePropertyDataFormat,
-                               &thePropSize,
-                               &audioDataInfo);
-    *freq = audioDataInfo.mSampleRate;
-    if(audioDataInfo.mBitsPerChannel == 8 && audioDataInfo.mChannelsPerFrame == 1){
+    if(info.mBitsPerChannel == 8 && info.mChannelsPerFrame == 1){
         *format = AL_FORMAT_MONO8;//8位单通道
-    }else if(audioDataInfo.mBitsPerChannel == 8 && audioDataInfo.mChannelsPerFrame == 2){
+    }else if(info.mBitsPerChannel == 8 && info.mChannelsPerFrame == 2){
         *format = AL_FORMAT_STEREO8;//8位双通道
-    }else if(audioDataInfo.mBitsPerChannel == 16 && audioDataInfo.mChannelsPerFrame == 1){
+    }else if(info.mBitsPerChannel == 16 && info.mChannelsPerFrame == 1){
         *format = AL_FORMAT_MONO16;//16位单通道
-    }else if(audioDataInfo.mBitsPerChannel == 16 && audioDataInfo.mChannelsPerFrame == 2){
+    }else if(info.mBitsPerChannel == 16 && info.mChannelsPerFrame == 2){
         *format = AL_FORMAT_STEREO16;//16位双通道
     }else{
         return -1;//不能识别
     }
-    
-    //data
-    *data = malloc(*size);
-    err = AudioFileReadBytes(fileID, false, 0, size, *data);
-//    AudioFileClose(fileID);
-//    free(*data);
-    
-    if(err) return -1;
-    return 0;
+    return err;
 }
-
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-static void* MyGetOpenALAudioData(CFURLRef inFileURL, ALsizei *outDataSize, ALenum *outDataFormat, ALsizei*    outSampleRate)
-{
-    OSStatus                        err = noErr;
-    SInt64                            theFileLengthInFrames = 0;
-    AudioStreamBasicDescription        theFileFormat;
-    UInt32                            thePropertySize = sizeof(theFileFormat);
-    ExtAudioFileRef                    extRef = NULL;
-    void*                            theData = NULL;
-    AudioStreamBasicDescription        theOutputFormat;
-    
-    // Open a file with ExtAudioFileOpen()
-    err = ExtAudioFileOpenURL(inFileURL, &extRef);
-    if(err) { printf("MyGetOpenALAudioData: ExtAudioFileOpenURL FAILED, Error = %d\n", (int)err); goto Exit; }
-    
-    // Get the audio data format
-    err = ExtAudioFileGetProperty(extRef, kExtAudioFileProperty_FileDataFormat, &thePropertySize, &theFileFormat);
-    if(err) { printf("MyGetOpenALAudioData: ExtAudioFileGetProperty(kExtAudioFileProperty_FileDataFormat) FAILED, Error = %d\n", (int)err); goto Exit; }
-    if (theFileFormat.mChannelsPerFrame > 2)  { printf("MyGetOpenALAudioData - Unsupported Format, channel count is greater than stereo\n"); goto Exit;}
-    
-    // Set the client format to 16 bit signed integer (native-endian) data
-    // Maintain the channel count and sample rate of the original source format
-    theOutputFormat.mSampleRate = theFileFormat.mSampleRate;
-    theOutputFormat.mChannelsPerFrame = theFileFormat.mChannelsPerFrame;
-    
-    theOutputFormat.mFormatID = kAudioFormatLinearPCM;
-    theOutputFormat.mBytesPerPacket = 2 * theOutputFormat.mChannelsPerFrame;
-    theOutputFormat.mFramesPerPacket = 1;
-    theOutputFormat.mBytesPerFrame = 2 * theOutputFormat.mChannelsPerFrame;
-    theOutputFormat.mBitsPerChannel = 16;
-    theOutputFormat.mFormatFlags = kAudioFormatFlagsNativeEndian | kAudioFormatFlagIsPacked | kAudioFormatFlagIsSignedInteger;
-    
-    // Set the desired client (output) data format
-    err = ExtAudioFileSetProperty(extRef, kExtAudioFileProperty_ClientDataFormat, sizeof(theOutputFormat), &theOutputFormat);
-    if(err) { printf("MyGetOpenALAudioData: ExtAudioFileSetProperty(kExtAudioFileProperty_ClientDataFormat) FAILED, Error = %d\n", (int)err); goto Exit; }
-    
-    // Get the total frame count
-    thePropertySize = sizeof(theFileLengthInFrames);
-    err = ExtAudioFileGetProperty(extRef, kExtAudioFileProperty_FileLengthFrames, &thePropertySize, &theFileLengthInFrames);
-    if(err) { printf("MyGetOpenALAudioData: ExtAudioFileGetProperty(kExtAudioFileProperty_FileLengthFrames) FAILED, Error = %d\n", (int)err); goto Exit; }
-    
-    // Read all the data into memory
-    UInt32 theFramesToRead = (UInt32)theFileLengthInFrames;
-    UInt32 dataSize = theFramesToRead * theOutputFormat.mBytesPerFrame;;
-    theData = malloc(dataSize);
-    if (theData)
-    {
-        AudioBufferList        theDataBuffer;
-        theDataBuffer.mNumberBuffers = 1;
-        theDataBuffer.mBuffers[0].mDataByteSize = dataSize;
-        theDataBuffer.mBuffers[0].mNumberChannels = theOutputFormat.mChannelsPerFrame;
-        theDataBuffer.mBuffers[0].mData = theData;
-        
-        // Read the data into an AudioBufferList
-        err = ExtAudioFileRead(extRef, &theFramesToRead, &theDataBuffer);
-        if(err == noErr)
-        {
-            // success
-            *outDataSize = (ALsizei)dataSize;
-            *outDataFormat = (theOutputFormat.mChannelsPerFrame > 1) ? AL_FORMAT_STEREO16 : AL_FORMAT_MONO16;
-            *outSampleRate = (ALsizei)theOutputFormat.mSampleRate;
-        }
-        else
-        {
-            // failure
-            free (theData);
-            theData = NULL; // make sure to return NULL
-            printf("MyGetOpenALAudioData: ExtAudioFileRead FAILED, Error = %d\n", (int)err); goto Exit;
-        }
-    }
-    
-Exit:
-    // Dispose the ExtAudioFileRef, it is no longer needed
-    if (extRef) ExtAudioFileDispose(extRef);
-    return theData;
-}
-
 @end
 
