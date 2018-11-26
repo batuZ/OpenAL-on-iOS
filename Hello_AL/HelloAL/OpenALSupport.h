@@ -15,6 +15,10 @@ NS_ASSUME_NONNULL_BEGIN
 +(OSStatus)audioFileSize:(AudioFileID)fileID Size:(UInt32*)size;
 +(OSStatus)audioFileFormat:(AudioFileID)fileID format:(ALenum*)format SampleRate:(ALsizei*)freq;
 
+//
++(ALvoid)alBufferDataStatic_BufferID:(ALint)bid format:(ALenum)format data:(ALvoid*)data size:(ALsizei) size freq:(ALsizei)freq;
+
+
 +(ALvoid)Rendering_Quality:(ALint)value;
 @end
 

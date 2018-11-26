@@ -61,6 +61,16 @@
     return err;
 }
 
+
++(ALvoid)alBufferDataStatic_BufferID:(ALint)bid format:(ALenum)format data:(ALvoid*)data size:(ALsizei) size freq:(ALsizei)freq{
+    static alBufferDataStaticProcPtr proc = NULL;
+    if(proc == NULL){
+        proc = (alBufferDataStaticProcPtr)alcGetProcAddress(NULL, "alBufferDataStatic");
+    }
+    proc(bid,format,data,size,freq);
+}
+
+
 +(ALvoid)Rendering_Quality:(ALint)value{
     static alcMacOSXRenderingQualityProcPtr Rendering_Quality = NULL;
     if(Rendering_Quality == NULL)
