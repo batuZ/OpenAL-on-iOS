@@ -80,7 +80,7 @@ NSMutableDictionary *di=nil;
 #pragma mark - play many files(buffer) with a source
 //用于支持下载的数据流
 -(void)palyManyFiles{
-    UInt32 audioSize;
+    ALsizei audioSize;
     ALvoid* audioData;
     ALenum format;
     ALsizei freq;
