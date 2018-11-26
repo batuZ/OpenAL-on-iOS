@@ -18,7 +18,9 @@ NSMutableDictionary *di=nil;
     di[@"sound_engine"] = @"/Users/Batu/Music/media/SoundFiles/sound_engine.wav"; //13s 1-16 22kHz
     di[@"sound_monkey"] = @"/Users/Batu/Music/media/SoundFiles/sound_monkey.wav"; //82s 1-16 48kHz
     di[@"sound_voices"] = @"/Users/Batu/Music/media/SoundFiles/sound_voices.wav"; //31s 1-16 44.1kHz
+    di[@"wow"] = @"/Users/Batu/Music/QQ_music/wow.mp3"; //4m35s 2-16 44.1kHz
 }
+
 -(void)viewWillDisappear:(BOOL)animated{
     [super viewWillDisappear:animated];
     [OpenALSupport closeAL];
@@ -41,7 +43,7 @@ NSMutableDictionary *di=nil;
     NSURL* filePath;
     
     // get data info
-    filePath = [NSURL URLWithString:di[@"sound_monkey"]];
+    filePath = [NSURL URLWithString:di[@"wow"]];
     err = [OpenALSupport openAudioFile:filePath AudioFileID:&fileID];
     if(err) return;
     
@@ -78,23 +80,17 @@ NSMutableDictionary *di=nil;
 #pragma mark - play many files(buffer) with a source
 //用于支持下载的数据流
 -(void)palyManyFiles{
-    AudioFileID fileID;
     UInt32 audioSize;
     ALvoid* audioData;
     ALenum format;
     ALsizei freq;
     ALuint bids[3],sid;
-
+    
     NSArray* fileArr = @[di[@"wave1"], di[@"wave2"] ,di[@"wave3"]];
     alGenBuffers(3, bids);
     alGenSources(1, &sid);
     for (int i = 0 ; i < fileArr.count; i++) {
-        NSURL* filePath = [NSURL URLWithString:fileArr[i]];
-        [OpenALSupport openAudioFile:filePath AudioFileID:&fileID];
-        [OpenALSupport audioFileSize:fileID Size:&audioSize];
-        [OpenALSupport audioFileFormat:fileID format:&format SampleRate:&freq];
-        audioData = malloc(audioSize);
-        AudioFileReadBytes(fileID, false, 0, &audioSize, audioData);
+        audioData = [OpenALSupport GetAudioDataWithPath:fileArr[i] outDataSize:&audioSize outDataFormat:&format outSampleRate:&freq];
         [OpenALSupport alBufferDataStatic_BufferID:bids[i] format:format data:audioData size:audioSize freq:freq];
     }
     //附加一个或一组buffer到一个source上
@@ -106,7 +102,7 @@ NSMutableDictionary *di=nil;
     ALint processed, queued, state;
     
     //获取处理队列，得出已经播放过的缓冲器的数量
-     alGetSourcei(sid, AL_BUFFERS_PROCESSED, &processed);
+    alGetSourcei(sid, AL_BUFFERS_PROCESSED, &processed);
     
     //获取缓存队列，缓存的队列数量
     alGetSourcei(sid, AL_BUFFERS_QUEUED, &queued);
