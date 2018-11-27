@@ -21,6 +21,27 @@
     alcCloseDevice(device);
 }
 
++(void)PlayAudioWithFilepath:(NSString*)filePath finish:(void(^)(void))callBack{
+    ALsizei audioSize;
+    ALvoid* audioData;
+    ALenum format;
+    ALsizei freq;
+    ALuint bid, sid;
+    audioData = [OpenALSupport GetAudioDataWithPath:filePath outDataSize:&audioSize outDataFormat:&format outSampleRate:&freq];
+    alGenBuffers(1, &bid);
+    [OpenALSupport alBufferDataStatic_BufferID:bid format:format data:audioData size:audioSize freq:freq];
+    alGenSources(1, &sid);
+    alSourcei(sid, AL_BUFFER, bid);
+    alSourcePlay(sid);
+    
+    ALint state;
+    do{
+        alGetSourcei(sid, AL_SOURCE_STATE, &state);
+        sleep(1);
+    }while(state == AL_PLAYING);
+    
+    callBack();
+}
 
 +(OSStatus)openAudioFile:(NSURL*)filePath AudioFileID:(AudioFileID*)fileID{
     OSStatus  err = AudioFileOpenURL(
