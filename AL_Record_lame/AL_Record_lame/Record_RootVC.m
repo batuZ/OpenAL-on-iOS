@@ -37,7 +37,8 @@
     }
 }
 - (IBAction)playPress:(UIButton *)sender {
-    [OpenALSupport PlayAudioWithFilepath:mp3File finish:^{}];
+    if(mp3File)
+        [OpenALSupport PlayAudioWithFilepath:mp3File finish:^{}];
 }
 
 @end

@@ -17,6 +17,7 @@
     NSString* _rootDir;
     NSString* _wavPath;
     NSString* _mp3Path;
+    BOOL deleteWAV; //是否在转MP3后立即删除WAV
 }
 
 @end
@@ -47,6 +48,7 @@
     }
     
     _ecorderSetting = [self getRecorderSetting];
+    deleteWAV = YES;
 }
 
 -(void)startRecord:(NSString*) uuid{
@@ -70,18 +72,17 @@
 
 -(void)stopRecordWithCallBack:(void(^)(NSString* res))callback{
     if(_msRecorder!=nil){
-         [_msRecorder stop];
+        [_msRecorder stop];
         
-        [ConvertAudioFile conventToMp3WithCafFilePath:_wavPath
-                                          mp3FilePath:_mp3Path
-                                           sampleRate:44100
-                                             callback:^(BOOL result) {
+        [ConvertAudioFile conventToMp3WithCafFilePath:_wavPath mp3FilePath:_mp3Path sampleRate:44100 callback:^(BOOL result) {
             if(result)
                 callback(self->_mp3Path);
             else
                 callback(nil);
+            
+            if(self->deleteWAV && [[NSFileManager defaultManager] fileExistsAtPath:self->_wavPath])
+                [[NSFileManager defaultManager] removeItemAtPath:self->_wavPath error:nil];
         }];
-        
     }
 }
 
