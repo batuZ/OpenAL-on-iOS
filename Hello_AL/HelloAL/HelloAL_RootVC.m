@@ -27,36 +27,19 @@ NSMutableDictionary *di=nil;
 }
 
 - (IBAction)onPlay:(id)sender {
-    //[self playOneFile];
+    [self playOneFile];
     [self palyManyFiles];
 }
 
 #pragma mark -  play a static file
 -(void)playOneFile{
-    OSStatus err = noErr;
-    AudioFileID fileID;
-    UInt32 audioSize;
+    ALsizei audioSize;
     ALvoid* audioData;
     ALenum format;
     ALsizei freq;
     ALuint bid, sid;
-    NSURL* filePath;
-    
-    // get data info
-    filePath = [NSURL URLWithString:di[@"wow"]];
-    err = [OpenALSupport openAudioFile:filePath AudioFileID:&fileID];
-    if(err) return;
-    
-    err = [OpenALSupport audioFileSize:fileID Size:&audioSize];
-    if(err) return;
-    
-    err = [OpenALSupport audioFileFormat:fileID format:&format SampleRate:&freq];
-    if(err) return;
-    
-    // read data
-    audioData = malloc(audioSize);
-    err = AudioFileReadBytes(fileID, false, 0, &audioSize, audioData);
-    if(err) return;
+   
+    audioData = [OpenALSupport GetAudioDataWithPath:di[@"wow"] outDataSize:&audioSize outDataFormat:&format outSampleRate:&freq];
     
     // create&setting buffer
     alGenBuffers(1, &bid);
