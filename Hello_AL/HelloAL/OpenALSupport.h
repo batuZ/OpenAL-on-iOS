@@ -10,6 +10,7 @@ NS_ASSUME_NONNULL_BEGIN
 +(void)initAL;
 +(void)closeAL;
 
++(void)closeDataSources:(ALuint[])sources sourcesCount:(int) sCount buffers:(ALuint[])buffers buffersCount:(int) bCount;
 +(void)PlayAudioWithFilepath:(NSString*)filePath finish:(void(^)(void))callBack;
 
 +(ALvoid)alBufferDataStatic_BufferID:(ALint)bid format:(ALenum)format data:(ALvoid*)data size:(ALsizei) size freq:(ALsizei)freq;

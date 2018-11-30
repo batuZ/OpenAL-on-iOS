@@ -9,17 +9,22 @@
 #import "rootVC.h"
 #import "OpenALSupport.h"
 #import <CoreMotion/CoreMotion.h>
+
 @interface rootVC ()
 {
     ALuint bid, sid;
     NSString* audioFile;
-    
+    float _jl;
 }
 @property (strong, nonatomic) CMMotionManager* motionManager;
 @property (weak, nonatomic) IBOutlet UILabel *audioName;
 @property (weak, nonatomic) IBOutlet UILabel *audioInfo;
 @property (weak, nonatomic) IBOutlet UILabel *listenerHeading;
 @property (weak, nonatomic) IBOutlet UILabel *listenerPos;
+
+@property (weak, nonatomic) IBOutlet UILabel *listenerLab;
+@property (weak, nonatomic) IBOutlet UILabel *soundLab;
+
 @end
 
 @implementation rootVC
@@ -28,30 +33,10 @@ NSMutableDictionary *di=nil;
     [super viewDidLoad];
     [OpenALSupport initAL];
     self.motionManager = [[CMMotionManager alloc] init];
-    di = [[NSMutableDictionary alloc] init];
-    di[@"Footsteps"] = @"/Users/Batu/Music/media/Footsteps.wav";    // 3s 1-16 44.1kHz
-    di[@"fiveptone"] = @"/Users/Batu/Music/media/fiveptone.wav";    // 12S 6-16 48kHz
-    di[@"stereo"] = @"/Users/Batu/Music/media/stereo.wav";          // 3s 2-16 22kHz
-    di[@"wave1"] = @"/Users/Batu/Music/media/wave1.wav";            // 1s 1-16 44.1kHz
-    di[@"wave2"] = @"/Users/Batu/Music/media/wave2.wav";            // 1s 1-16 44.1kHz
-    di[@"wave3"] = @"/Users/Batu/Music/media/wave3.wav";            // 1s 1-16 44.1kHz
-    
-    di[@"sound_bubbles"] = @"/Users/Batu/Music/media/SoundFiles/sound_bubbles.wav"; //10s 1-16 22kHz
-    di[@"sound_electric"] = @"/Users/Batu/Music/media/SoundFiles/sound_electric.wav"; //29s 1-16 22kHz
-    di[@"sound_engine"] = @"/Users/Batu/Music/media/SoundFiles/sound_engine.wav"; //13s 1-16 22kHz
-    di[@"sound_monkey"] = @"/Users/Batu/Music/media/SoundFiles/sound_monkey.wav"; //82s 1-16 48kHz
-    di[@"sound_voices"] = @"/Users/Batu/Music/media/SoundFiles/sound_voices.wav"; //31s 1-16 44.1kHz
-    di[@"wow"] = @"/Users/Batu/Music/QQ_music/wow.mp3"; //4m35s 2-16 44.1kHz
-    
-
-   audioFile = [[NSBundle mainBundle] pathForResource:@"Footsteps" ofType:@"wav"];
-
-    
+    audioFile = [[NSBundle mainBundle] pathForResource:@"Footsteps" ofType:@"wav"];
+    _jl = sqrtf(pow((_soundLab.frame.origin.x - _listenerLab.frame.origin.x),2)+ pow((_soundLab.frame.origin.y - _listenerLab.frame.origin.y),2));
 }
--(void) copyFile{
-    
-    NSString* temp = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) firstObject];
-}
+
 - (IBAction)playStop:(UIButton *)sender {
     ALint soucreState;
     alGetSourcei(sid, AL_SOURCE_STATE, &soucreState);
@@ -83,15 +68,19 @@ NSMutableDictionary *di=nil;
     alSource3f(sid, AL_POSITION, 0, 0, 1);
 }
 
--(void)setListenerWithDeraction:(double)angre{
-    alListener3f(AL_POSITION, 0, -1, 0);
-    
+-(void)setListenerWithDeraction:(float)angre{
     //转头影响1、2
-    float x = sin(angre);
-    float y = cos(angre);
+    float x = sinf(angre*0.0174532925);
+    float y = cosf(angre*0.0174532925);
     ALfloat ori[] = {x,y,0,  0,0,1};
-    self.listenerHeading.text = [NSString stringWithFormat:@"heading: %0.1f {%0.3f}, {%0.3f}, 0",angre,x,y];
+    self.listenerHeading.text = [NSString stringWithFormat:@"heading: %f {%0.2f, %0.2f, 0}",angre,x,y];
+    self.soundLab.frame = CGRectMake(
+                                     _listenerLab.frame.origin.x-x*_jl,
+                                     _listenerLab.frame.origin.y-y*_jl,
+                                     _soundLab.frame.size.width,
+                                     _soundLab.frame.size.height);
     alListenerfv(AL_ORIENTATION, ori);
+    alListener3f(AL_POSITION, 0, -1, 0);
 }
 
 -(void)getAudioInfo{
@@ -109,14 +98,16 @@ NSMutableDictionary *di=nil;
 
 -(void)startMotion{
     if([self.motionManager isDeviceMotionAvailable]){
-         self.motionManager.deviceMotionUpdateInterval = 0.1;
+        self.motionManager.deviceMotionUpdateInterval = 0.1;
         NSOperationQueue* _queue = [[NSOperationQueue alloc] init];
         [self.motionManager startDeviceMotionUpdatesUsingReferenceFrame:CMAttitudeReferenceFrameXMagneticNorthZVertical toQueue:_queue withHandler:^(CMDeviceMotion * motion, NSError * error){
             if(error){
                 NSLog(@"error:%@",error);
                 [self.motionManager stopDeviceMotionUpdates];
             }else{
-                [self setListenerWithDeraction:motion.heading];
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [self setListenerWithDeraction:(float)motion.heading];
+                });
             }
         }];
     }

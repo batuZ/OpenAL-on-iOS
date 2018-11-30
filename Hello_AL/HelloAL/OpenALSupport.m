@@ -3,13 +3,14 @@
 @implementation OpenALSupport
 
 +(void)initAL{
-    ALCcontext *newContext = NULL;
-    ALCdevice *newDevice = NULL;
-    newDevice = alcOpenDevice(NULL);
-    if (newDevice != NULL){
-        newContext = alcCreateContext(newDevice, 0);
-        if (newContext != NULL){
-            alcMakeContextCurrent(newContext);
+    ALCcontext *newContext = alcGetCurrentContext();
+    if(!newContext){
+        ALCdevice *newDevice = alcOpenDevice(NULL);
+        if (newDevice != NULL){
+            newContext = alcCreateContext(newDevice, 0);
+            if (newContext != NULL){
+                alcMakeContextCurrent(newContext);
+            }
         }
     }
 }
@@ -207,6 +208,16 @@ label_exit:
         proc = (alBufferDataStaticProcPtr)alcGetProcAddress(NULL, "alBufferDataStatic");
     }
     proc(bid,format,data,size,freq);
+}
++(void)closeDataSources:(ALuint[])sources sourcesCount:(int) sourcesCount buffers:(ALuint[])buffers buffersCount:(int) bCount;{
+    for (int i =0 ; i<sourcesCount; i++) {
+        //取消关联，被sources关联的buffer不能释放
+        alSourcei(sources[i], AL_BUFFER, 0);
+        alDeleteSources(1, &sources[i]);
+    }
+    for(int i =0 ; i<bCount; i++) {
+        alDeleteBuffers(1, &buffers[i])
+    }
 }
 @end
 
