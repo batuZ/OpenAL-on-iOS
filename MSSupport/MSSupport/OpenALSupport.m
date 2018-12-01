@@ -2,24 +2,27 @@
 
 @implementation OpenALSupport
 
-+(void)initAL{
++(BOOL)initAL{
     ALCcontext *newContext = alcGetCurrentContext();
     if(!newContext){
         ALCdevice *newDevice = alcOpenDevice(NULL);
-        if (newDevice != NULL){
-            newContext = alcCreateContext(newDevice, 0);
-            if (newContext != NULL){
+        if (!newDevice){
+            newContext = alcCreateContext(newDevice, NULL);
+            if (!newContext){
                 alcMakeContextCurrent(newContext);
-            }
-        }
+            }else return NO;
+        }else return NO;
     }
+    return YES;
 }
 +(void)closeAL{
     ALCcontext *context = alcGetCurrentContext();
-    ALCdevice *device = alcGetContextsDevice(context);
-    alcMakeContextCurrent(NULL);
-    alcDestroyContext(context);
-    alcCloseDevice(device);
+    if(!context){
+        ALCdevice *device = alcGetContextsDevice(context);
+        alcMakeContextCurrent(NULL);
+        alcDestroyContext(context);
+        alcCloseDevice(device);
+    }
 }
 
 +(void)PlayAudioWithFilepath:(NSString*)filePath finish:(void(^)(void))callBack{
@@ -202,22 +205,13 @@ label_exit:
     }
     return data;
 }
+
 +(ALvoid)alBufferDataStatic_BufferID:(ALint)bid format:(ALenum)format data:(ALvoid*)data size:(ALsizei) size freq:(ALsizei)freq{
     static alBufferDataStaticProcPtr proc = NULL;
     if(proc == NULL){
         proc = (alBufferDataStaticProcPtr)alcGetProcAddress(NULL, "alBufferDataStatic");
     }
     proc(bid,format,data,size,freq);
-}
-+(void)closeDataSources:(ALuint[])sources sourcesCount:(int) sourcesCount buffers:(ALuint[])buffers buffersCount:(int) bCount;{
-    for (int i =0 ; i<sourcesCount; i++) {
-        //取消关联，被sources关联的buffer不能释放
-        alSourcei(sources[i], AL_BUFFER, 0);
-        alDeleteSources(1, &sources[i]);
-    }
-    for(int i =0 ; i<bCount; i++) {
-        alDeleteBuffers(1, &buffers[i]);
-    }
 }
 @end
 
