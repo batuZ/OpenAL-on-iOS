@@ -6,9 +6,9 @@
     ALCcontext *newContext = alcGetCurrentContext();
     if(!newContext){
         ALCdevice *newDevice = alcOpenDevice(NULL);
-        if (!newDevice){
+        if (newDevice){
             newContext = alcCreateContext(newDevice, NULL);
-            if (!newContext){
+            if (newContext){
                 alcMakeContextCurrent(newContext);
             }else return NO;
         }else return NO;

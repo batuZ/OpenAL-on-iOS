@@ -11,7 +11,7 @@
 #import <Foundation/Foundation.h>
 #import <CoreLocation/CoreLocation.h>
 #ifdef DEBUG
-#define ALog(...) printf("--%s at %d : ",__func__,__LINE__); printf(__VA_ARGS__)
+#define ALog(...) printf("-->%s at %d : ",__FUNCTION__,__LINE__); printf(__VA_ARGS__);printf("\n")
 #else
 #define ALog(...)
 #endif
