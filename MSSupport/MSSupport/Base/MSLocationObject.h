@@ -10,14 +10,8 @@
 
 #import <Foundation/Foundation.h>
 #import <CoreLocation/CoreLocation.h>
-#ifdef DEBUG
-#define ALog(...) printf("-->%s at %d : ",__FUNCTION__,__LINE__); printf(__VA_ARGS__);printf("\n")
-#else
-#define ALog(...)
-#endif
+
 NS_ASSUME_NONNULL_BEGIN
-
-
 
 typedef NS_ENUM(NSInteger,OBJ_TYPE)
 {
@@ -37,12 +31,17 @@ typedef NS_ENUM(NSInteger,OBJ_TYPE)
 //图标
 @property(strong, nonatomic) NSString* iconName;
 
-
 -(instancetype)initWithType:(OBJ_TYPE)type;
-
 
 //禁用初始化方法
 -(instancetype)init __attribute__((deprecated));
 @end
 
 NS_ASSUME_NONNULL_END
+
+
+#ifdef DEBUG
+#define ALog(...) printf("-->%s at %d : ",__FUNCTION__,__LINE__); printf(__VA_ARGS__);printf("\n")
+#else
+#define ALog(...)
+#endif

@@ -1,4 +1,5 @@
 #import "OpenALSupport.h"
+#import "MSLocationObject.h"
 
 @implementation OpenALSupport
 
@@ -115,7 +116,7 @@
     
     if (error != noErr)
     {
-        NSLog(@"Audio GetAudioData ExtAudioFileOpenURL failed, error = %x, filePath = %@", (int) error, fileUrl);
+        ALog("Audio GetAudioData ExtAudioFileOpenURL failed, error = %x", (int) error);
         goto label_exit;
     }
     
@@ -124,13 +125,13 @@
     
     if (error != noErr)
     {
-        NSLog(@"Audio GetAudioData ExtAudioFileGetProperty(kExtAudioFileProperty_FileDataFormat) failed, error = %x, filePath = %@", (int) error, fileUrl);
+        ALog("Audio GetAudioData ExtAudioFileGetProperty(kExtAudioFileProperty_FileDataFormat) failed, error = %x", (int) error);
         goto label_exit;
     }
     
     if (fileFormat.mChannelsPerFrame > 2)
     {
-        NSLog(@"Audio GetAudioData unsupported format, channel count = %u is greater than stereo, filePath = %@", fileFormat.mChannelsPerFrame, fileUrl);
+        ALog("Audio GetAudioData unsupported format, channel count = %u is greater than stereo", fileFormat.mChannelsPerFrame);
         goto label_exit;
     }
     
@@ -150,7 +151,7 @@
     
     if(error != noErr)
     {
-        NSLog(@"Audio GetAudioData ExtAudioFileSetProperty(kExtAudioFileProperty_ClientDataFormat) failed, error = %x, filePath = %@", (int) error, fileUrl);
+        ALog("Audio GetAudioData ExtAudioFileSetProperty(kExtAudioFileProperty_ClientDataFormat) failed, error = %x", (int) error);
         goto label_exit;
     }
     
@@ -160,7 +161,7 @@
     
     if(error != noErr)
     {
-        NSLog(@"Audio GetAudioData ExtAudioFileGetProperty(kExtAudioFileProperty_FileLengthFrames) failed, error = %x, filePath = %@", (int) error, fileUrl);
+        ALog("Audio GetAudioData ExtAudioFileGetProperty(kExtAudioFileProperty_FileLengthFrames) failed, error = %x", (int) error);
         goto label_exit;
     }
     
@@ -191,7 +192,7 @@
         {
             free(data);
             data = NULL; // make sure to return NULL
-            NSLog(@"Audio GetAudioData ExtAudioFileRead failed, error = %x, filePath = %@", (int) error, fileUrl);
+            ALog("Audio GetAudioData ExtAudioFileRead failed, error = %x", (int) error);
             goto label_exit;
         }
     }

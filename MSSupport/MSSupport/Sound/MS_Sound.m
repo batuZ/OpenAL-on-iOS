@@ -14,7 +14,6 @@
 @interface MS_Sound()
 {
     ALuint sid,bid;
-    
     AVAudioRecorder* _msRecorder;
 }
 @end
@@ -32,7 +31,9 @@
     ALenum format;
     ALenum err;
     NSString* mp3Path = get_mp3_path(self.uuid);                    //获取MP3的本地路径
+#ifdef DEBUG
     mp3Path = @"/Users/Batu/Music/QQ_music/wow.mp3";
+#endif
     if([[NSFileManager defaultManager] fileExistsAtPath:mp3Path]    //文件存在
        && [OpenALSupport initAL]){                                  //确认环境已初始化
         
@@ -119,39 +120,50 @@
         NSURL* url = [NSURL fileURLWithPath:get_wav_path(self.uuid)];
         NSError* error;
         _msRecorder = [[AVAudioRecorder alloc] initWithURL:url settings:[self getRecorderSetting] error:&error];
+        
         if(error){
             ALog("录音机初始化失败。");
             return NO;
         }
-        [_msRecorder record];
-        return YES;
+       return [_msRecorder record];
     }
 }
--(void)StopRecordWithBlock:(void(^)(NSString* res))finished{
+-(BOOL)StopRecordWithBlock:(void(^)(NSString* res))finished{
     if(_msRecorder!=nil){
         [_msRecorder stop];
-        NSString* wav = get_wav_path(self.uuid);
         NSString* mp3 = get_mp3_path(self.uuid);
+        NSString* wav = get_wav_path(self.uuid);
         [LameSupport conventToMp3AfterWithCafFilePath:wav mp3FilePath:mp3 sampleRate:44100 callback:^(BOOL result) {
-            if(result)
+            if(result){
                 finished(mp3);
-            else
+            }
+            else{
                 finished(nil);
-            //删掉wav
-            //[self->_msRecorder deleteRecording];
+                ALog("wav转mp3失败。");
+            }
         }];
+        return YES;
+    }else{
+        ALog("录音机还没有创建，不能停止录音。");
+        return NO;
     }
 }
--(void)CancelRecord{
-    if(_msRecorder!=nil)
-        [_msRecorder deleteRecording];//delete wav
+-(BOOL)CancelRecord{
+    if(_msRecorder||_msRecorder.recording){
+        ALog("录音机还没有创建，或正在录音，不能清除wav。");
+        return NO;
+    }
+    else
+       return [_msRecorder deleteRecording];//delete wav
 }
-
 
 #pragma mark - helpers
 // 返回沙盒中Temp/Sounds与wav文件的组合路径
 NSString* get_wav_path(NSString* _Nonnull uuid){
     NSString* soundD = [NSTemporaryDirectory() stringByAppendingString:@"/Sounds/"];
+#ifdef DEBUG
+    soundD = @"/Users/Batu/Music/testSound/";
+#endif
     NSString* name = [NSString stringWithFormat:@"%@.wav",uuid];
     return [soundD stringByAppendingString:name];
 }
@@ -159,6 +171,9 @@ NSString* get_wav_path(NSString* _Nonnull uuid){
 NSString* get_mp3_path(NSString* _Nonnull uuid){
     NSString* cachesDir = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) firstObject];
     NSString* soundD = [cachesDir stringByAppendingString:@"/Sounds/"];
+#ifdef DEBUG
+    soundD = @"/Users/Batu/Music/testSound/";
+#endif
     NSString* name = [NSString stringWithFormat:@"%@.mp3",uuid];
     return [soundD stringByAppendingString:name];
 }

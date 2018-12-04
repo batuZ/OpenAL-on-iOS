@@ -20,8 +20,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 #pragma mark - Record
 -(BOOL)Record;
--(void)StopRecordWithBlock:(void(^)(NSString*))finished;
--(void)CancelRecord;
+-(BOOL)StopRecordWithBlock:(void(^)(NSString*))finished;
+-(BOOL)CancelRecord;
 
 @end
 

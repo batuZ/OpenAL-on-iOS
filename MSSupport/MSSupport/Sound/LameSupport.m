@@ -7,7 +7,7 @@
 //
 
 #import "LameSupport.h"
-
+#import "MSLocationObject.h"
 @interface LameSupport()
 
 @end
@@ -35,7 +35,7 @@
                            callback:(void(^)(BOOL result))callback
 {
     
-    NSLog(@"convert begin!!");
+    ALog("convert begin!!");
     __weak typeof(self) weakself = self;
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         
@@ -76,24 +76,23 @@
                         //you will heard some noise at the beginning!!!
                         fseek(pcm, 4 * 1024, SEEK_CUR);
                         isSkipPCMHeader = YES;
-                        NSLog(@"skip pcm file header !!!!!!!!!!");
+                        ALog("skip pcm file header !!!!!!!!!!");
                     }
                     
                     read = (int)fread(pcm_buffer, 2 * sizeof(short int), PCM_SIZE, pcm);
                     write = lame_encode_buffer_interleaved(lame, pcm_buffer, read, mp3_buffer, MP3_SIZE);
                     fwrite(mp3_buffer, write, 1, mp3);
-                    NSLog(@"read %d bytes", write);
+                    ALog("read %d bytes",write);
                 } else {
                     [NSThread sleepForTimeInterval:0.05];
-                    NSLog(@"sleep");
+                    ALog("sleep");
                 }
                 
             } while (! weakself.stopRecord);
             
             read = (int)fread(pcm_buffer, 2 * sizeof(short int), PCM_SIZE, pcm);
             write = lame_encode_flush(lame, mp3_buffer, MP3_SIZE);
-            
-            NSLog(@"read %d bytes and flush to mp3 file", write);
+            ALog("read %d bytes and flush to mp3 file", write);
             lame_mp3_tags_fid(lame, mp3);
             
             lame_close(lame);
@@ -101,7 +100,7 @@
             fclose(pcm);
         }
         @catch (NSException *exception) {
-            NSLog(@"%@", [exception description]);
+            ALog("%s", [[exception description] UTF8String]);
             if (callback) {
                 callback(NO);
             }
@@ -110,7 +109,7 @@
             if (callback) {
                 callback(YES);
             }
-            NSLog(@"convert mp3 finish!!! %@", mp3FilePath);
+            ALog("convert mp3 finish!!! %s", [mp3FilePath UTF8String]);
         }
     });
 }
@@ -176,13 +175,13 @@
             fclose(pcm);
         }
         @catch (NSException *exception) {
-            NSLog(@"%@",[exception description]);
+            ALog("%s" ,[[exception description] UTF8String]);
             if (callback) {
                 callback(NO);
             }
         }
         @finally {
-            NSLog(@"-----\n  MP3生成成功: %@   -----  \n", mp3FilePath);
+            ALog("-----\n  MP3生成成功: %@   -----  \n", [mp3FilePath UTF8String]);
             if (callback) {
                 callback(YES);
             }
