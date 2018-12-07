@@ -181,7 +181,7 @@
             }
         }
         @finally {
-            ALog("-----\n  MP3生成成功: %@   -----  \n", [mp3FilePath UTF8String]);
+            ALog("-----\n  MP3生成成功: %s   -----  \n", [mp3FilePath UTF8String]);
             if (callback) {
                 callback(YES);
             }
