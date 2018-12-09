@@ -6,12 +6,11 @@
 //  Copyright © 2018 MS_Module. All rights reserved.
 //
 
+//#import <UIKit/UIKit.h>
 #import "MSLocationObject.h"
 
 NS_ASSUME_NONNULL_BEGIN
 @interface MS_Sound : MSLocationObject
-
--(instancetype)init;
 
 #pragma mark - Play
 -(BOOL)PlayWhithBlock:(void(^)(void))finished;
@@ -22,7 +21,7 @@ NS_ASSUME_NONNULL_BEGIN
 -(BOOL)Record;
 -(BOOL)StopRecordWithBlock:(void(^)(NSString*))finished;
 -(BOOL)CancelRecord;
-
+-(float)normalizedValue;
 @end
 
 NS_ASSUME_NONNULL_END

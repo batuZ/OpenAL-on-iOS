@@ -41,4 +41,16 @@
         [OpenALSupport PlayAudioWithFilepath:mp3File finish:^{}];
 }
 
+-(void)test{
+    NSMutableArray* pointArr = [[NSMutableArray alloc] init];
+    AVAudioRecorder *player = [[AVAudioRecorder alloc]init];
+    
+    player.meteringEnabled = YES;
+    [player updateMeters];
+    
+    float peakPower = [player averagePowerForChannel:0];//分贝
+    double peakPowerForChannel = pow(10, (0.05 * peakPower));//波形幅度
+    [pointArr addObject:[NSNumber numberWithDouble:peakPowerForChannel]];
+    
+}
 @end

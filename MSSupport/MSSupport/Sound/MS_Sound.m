@@ -18,12 +18,6 @@
 }
 @end
 @implementation MS_Sound
-- (instancetype)init{
-    self = [super initWithType:SOUND];
-    if (self) {
-    }
-    return self;
-}
 
 #pragma mark - Play
 -(BOOL)PlayWhithBlock:(void(^)(void))finished{
@@ -120,6 +114,8 @@
         NSURL* url = [NSURL fileURLWithPath:get_wav_path(self.uuid)];
         NSError* error;
         _msRecorder = [[AVAudioRecorder alloc] initWithURL:url settings:[self getRecorderSetting] error:&error];
+        [_msRecorder prepareToRecord];
+        [_msRecorder setMeteringEnabled:YES];
         
         if(error){
             ALog("录音机初始化失败。");
@@ -156,23 +152,33 @@
     else
        return [_msRecorder deleteRecording];//delete wav
 }
+-(float)normalizedValue{
+    [_msRecorder updateMeters];
+     //dB = 20*log(normalizedValue),分贝计算公式
+    return pow (10, [_msRecorder averagePowerForChannel:0] / 20);
+}
 
 #pragma mark - helpers
 // 返回沙盒中Temp/Sounds与wav文件的组合路径
 NSString* get_wav_path(NSString* _Nonnull uuid){
-    NSString* soundD = [NSTemporaryDirectory() stringByAppendingString:@"/Sounds/"];
-#ifdef DEBUG
+    NSString* soundD;
+#if TARGET_IPHONE_SIMULATOR
     soundD = @"/Users/Batu/Music/testSound/";
+#else
+    soundD = [NSTemporaryDirectory() stringByAppendingString:@"/Sounds/"];
 #endif
     NSString* name = [NSString stringWithFormat:@"%@.wav",uuid];
     return [soundD stringByAppendingString:name];
 }
+
 // 返回沙盒中Caches/Sounds与mp3文件的组合路径
 NSString* get_mp3_path(NSString* _Nonnull uuid){
-    NSString* cachesDir = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) firstObject];
-    NSString* soundD = [cachesDir stringByAppendingString:@"/Sounds/"];
-#ifdef DEBUG
+    NSString* soundD;
+#if TARGET_IPHONE_SIMULATOR
     soundD = @"/Users/Batu/Music/testSound/";
+#else
+    NSString* cachesDir = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) firstObject];
+    soundD = [cachesDir stringByAppendingString:@"/Sounds/"];
 #endif
     NSString* name = [NSString stringWithFormat:@"%@.mp3",uuid];
     return [soundD stringByAppendingString:name];

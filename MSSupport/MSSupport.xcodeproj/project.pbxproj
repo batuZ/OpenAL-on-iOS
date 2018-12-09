@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		470F14A621B3918F00839E13 /* LameSupport.h in Headers */ = {isa = PBXBuildFile; fileRef = 470F14A421B3918F00839E13 /* LameSupport.h */; };
 		470F14A721B3918F00839E13 /* LameSupport.m in Sources */ = {isa = PBXBuildFile; fileRef = 470F14A521B3918F00839E13 /* LameSupport.m */; };
+		4782FE2C21BAC639004656DD /* MS_LocationObject_Protocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 4782FE2B21BAC639004656DD /* MS_LocationObject_Protocol.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		4794696821B2AE51009D4641 /* MSSupport.h in Headers */ = {isa = PBXBuildFile; fileRef = 4794696621B2AE51009D4641 /* MSSupport.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		4794697021B2AFAD009D4641 /* MS_User.h in Headers */ = {isa = PBXBuildFile; fileRef = 4794696E21B2AFAD009D4641 /* MS_User.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		4794697121B2AFAD009D4641 /* MS_User.m in Sources */ = {isa = PBXBuildFile; fileRef = 4794696F21B2AFAD009D4641 /* MS_User.m */; };
@@ -31,6 +32,7 @@
 /* Begin PBXFileReference section */
 		470F14A421B3918F00839E13 /* LameSupport.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LameSupport.h; sourceTree = "<group>"; };
 		470F14A521B3918F00839E13 /* LameSupport.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LameSupport.m; sourceTree = "<group>"; };
+		4782FE2B21BAC639004656DD /* MS_LocationObject_Protocol.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MS_LocationObject_Protocol.h; sourceTree = "<group>"; };
 		4794696321B2AE51009D4641 /* MSSupport.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = MSSupport.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4794696621B2AE51009D4641 /* MSSupport.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSSupport.h; sourceTree = "<group>"; };
 		4794696721B2AE51009D4641 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -157,6 +159,7 @@
 				4794696621B2AE51009D4641 /* MSSupport.h */,
 				4796FDAB21B37A810007A305 /* MSLocationObject.h */,
 				4796FDAC21B37A810007A305 /* MSLocationObject.m */,
+				4782FE2B21BAC639004656DD /* MS_LocationObject_Protocol.h */,
 			);
 			path = Base;
 			sourceTree = "<group>";
@@ -171,6 +174,7 @@
 				4794696821B2AE51009D4641 /* MSSupport.h in Headers */,
 				4794697421B2AFF6009D4641 /* MS_Sound.h in Headers */,
 				4794697021B2AFAD009D4641 /* MS_User.h in Headers */,
+				4782FE2C21BAC639004656DD /* MS_LocationObject_Protocol.h in Headers */,
 				4796FDAD21B37A810007A305 /* MSLocationObject.h in Headers */,
 				470F14A621B3918F00839E13 /* LameSupport.h in Headers */,
 				4794698821B2B3A2009D4641 /* OpenALSupport.h in Headers */,

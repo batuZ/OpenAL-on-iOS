@@ -10,38 +10,21 @@
 
 #import <Foundation/Foundation.h>
 #import <CoreLocation/CoreLocation.h>
-
+#import "MS_LocationObject_Protocol.h"
 NS_ASSUME_NONNULL_BEGIN
 
-typedef NS_ENUM(NSInteger,OBJ_TYPE)
-{
-    NONE = 0,
-    SOUND = 1,
-    USER = 2,
-    OTHER
-};
-
-@interface MSLocationObject : NSObject
-// 名称（唯一），初始化时自动生成。
-@property(readonly,nonatomic)NSString* uuid;
-// 对象类型
-@property(readonly,nonatomic)OBJ_TYPE type;
-//位置信息
-@property(strong,nonatomic,nullable)CLLocation* location;
-//图标
-@property(strong, nonatomic) NSString* iconName;
-
+@interface MSLocationObject : NSObject <MS_LocationObject_Protocol,NSCoding>
+@property(nonatomic, readonly)  NSString*               uuid;
+@property(nonatomic, assign)    CLLocationCoordinate2D  coordinate;
+@property(nonatomic, readonly)  OBJ_TYPE                type;
+//创建新对象
 -(instancetype)initWithType:(OBJ_TYPE)type;
-
-//禁用初始化方法
+//读取已有对象到内存
+-(instancetype)initWithUUID:(NSString*)uuid Location:(CLLocationCoordinate2D)coordinate TYPE:(OBJ_TYPE)type;
+//禁用原构造函数
 -(instancetype)init __attribute__((deprecated));
 @end
 
 NS_ASSUME_NONNULL_END
 
 
-#ifdef DEBUG
-#define ALog(...) printf("-->%s at %d : ",__FUNCTION__,__LINE__); printf(__VA_ARGS__);printf("\n")
-#else
-#define ALog(...)
-#endif
