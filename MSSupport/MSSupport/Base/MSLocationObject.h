@@ -14,15 +14,25 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface MSLocationObject : NSObject <MS_LocationObject_Protocol,NSCoding>
+@property(class, nonatomic, strong, readonly) NSMutableDictionary* locObjects;
 @property(nonatomic, readonly)  NSString*               uuid;
 @property(nonatomic, assign)    CLLocationCoordinate2D  coordinate;
 @property(nonatomic, readonly)  OBJ_TYPE                type;
+@property(nonatomic, readonly)  NSDate*                 createDate;
+@property(nonatomic, strong)    NSString*               address;
+
 //创建新对象
 -(instancetype)initWithType:(OBJ_TYPE)type;
 //读取已有对象到内存
--(instancetype)initWithUUID:(NSString*)uuid Location:(CLLocationCoordinate2D)coordinate TYPE:(OBJ_TYPE)type;
+-(instancetype)initWithUUID:(NSString*)uuid Location:(CLLocationCoordinate2D)coordinate TYPE:(OBJ_TYPE)type date:(NSDate*)date;
 //禁用原构造函数
 -(instancetype)init __attribute__((deprecated));
+
++(BOOL)save;
++(BOOL)load;
+
+//getter
++(NSMutableDictionary*)locObjects;
 @end
 
 NS_ASSUME_NONNULL_END

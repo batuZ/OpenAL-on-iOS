@@ -21,7 +21,9 @@ NS_ASSUME_NONNULL_BEGIN
 -(BOOL)Record;
 -(BOOL)StopRecordWithBlock:(void(^)(NSString*))finished;
 -(BOOL)CancelRecord;
+//获取波形
 -(float)normalizedValue;
+
 @end
 
 NS_ASSUME_NONNULL_END

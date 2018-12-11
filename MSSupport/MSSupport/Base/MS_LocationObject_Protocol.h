@@ -26,6 +26,11 @@ typedef NS_ENUM(NSInteger,OBJ_TYPE)
 @property(nonatomic, readonly)  NSString*               uuid;
 @property(nonatomic, assign)    CLLocationCoordinate2D  coordinate;
 @property(nonatomic, readonly)  OBJ_TYPE                type;
+//自2001年1月1日00:00起取秒
+@property(nonatomic, readonly)  NSDate*          createDate;
+
+@optional
+@property(nonatomic, strong)    NSString*               address;
 @end
 
 NS_ASSUME_NONNULL_END
