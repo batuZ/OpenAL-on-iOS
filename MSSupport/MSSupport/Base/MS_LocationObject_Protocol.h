@@ -1,10 +1,3 @@
-//
-//  MS_LocationObject_Protocol.h
-//  MSSupport
-//
-//  Created by 张智 on 2018/12/7.
-//  Copyright © 2018 MS_Module. All rights reserved.
-//
 #ifdef DEBUG
 #define ALog(...) printf("-->%s at %d : ",__FUNCTION__,__LINE__); printf(__VA_ARGS__);printf("\n")
 #else
@@ -27,7 +20,7 @@ typedef NS_ENUM(NSInteger,OBJ_TYPE)
 @property(nonatomic, assign)    CLLocationCoordinate2D  coordinate;
 @property(nonatomic, readonly)  OBJ_TYPE                type;
 //自2001年1月1日00:00起取秒
-@property(nonatomic, readonly)  NSDate*          createDate;
+@property(nonatomic, readonly)  NSTimeInterval          createDate;
 
 @optional
 @property(nonatomic, strong)    NSString*               address;
