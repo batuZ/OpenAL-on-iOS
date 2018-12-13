@@ -117,6 +117,12 @@
         return [_msRecorder record];
     }
 }
+-(BOOL)PuaseRecord{
+    if(_msRecorder!=nil){
+        [_msRecorder pause];
+    }
+    return YES;
+}
 -(BOOL)StopRecordWithBlock:(void(^)(NSString* res))finished{
     if(_msRecorder!=nil){
         [_msRecorder stop];

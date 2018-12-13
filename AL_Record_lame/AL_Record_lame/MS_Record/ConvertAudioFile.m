@@ -80,7 +80,7 @@
                 if (length > PCM_SIZE * 2 * sizeof(short int)) {
                     
                     if (!isSkipPCMHeader) {
-                        //Uump audio file header, If you do not skip file header
+                        //Jump audio file header, If you do not skip file header
                         //you will heard some noise at the beginning!!!
                         fseek(pcm, 4 * 1024, SEEK_CUR);
                         isSkipPCMHeader = YES;

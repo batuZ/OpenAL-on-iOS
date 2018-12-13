@@ -19,6 +19,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 #pragma mark - Record
 -(BOOL)Record;
+-(BOOL)PuaseRecord;
 -(BOOL)StopRecordWithBlock:(void(^)(NSString*))finished;
 -(BOOL)CancelRecord;
 //获取波形

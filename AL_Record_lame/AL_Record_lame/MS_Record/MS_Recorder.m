@@ -39,7 +39,7 @@
 -(void)onInit{
     NSString* documets =[NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) firstObject];
     _rootDir = [documets stringByAppendingPathComponent:@"AudioData/"];
-    _rootDir = @"/Users/Batu/Music/testSound1/";
+    _rootDir = @"/Users/Batu/Projects/TEST_HOME/tmp/DIR_SOUNDS/";
     NSFileManager *fileManager = [NSFileManager defaultManager];
     BOOL isDir = FALSE;
     BOOL isDirExist = [fileManager fileExistsAtPath:_rootDir isDirectory:&isDir];
@@ -51,7 +51,7 @@
     deleteWAV = YES;
 }
 
--(void)startRecord:(NSString*) uuid{
+-(void)startRecordWithName:(NSString*) uuid{
     if(_msRecorder && _msRecorder.isRecording){
         [_msRecorder stop];
     }else{
@@ -60,7 +60,7 @@
         
         NSURL* url = [NSURL fileURLWithPath:_wavPath];
         NSError* error;
-        _msRecorder = [[AVAudioRecorder alloc] initWithURL:url settings:_ecorderSetting error:&error];
+        _msRecorder = [[AVAudioRecorder alloc] initWithURL:url settings:[self getRecorderSetting] error:&error];
         if(error){
             NSLog(@"init error!");
             return ;
@@ -94,7 +94,11 @@
 -(BOOL)isRecording{
     return _msRecorder!=nil && [_msRecorder isRecording];
 }
-
+-(void)pause{
+    if(_msRecorder!=nil){
+        [_msRecorder pause];
+    }
+}
 -(NSMutableDictionary *)getRecorderSetting{
     //创建一个Dictionary，用于保存录制属性
     NSMutableDictionary *recordSettings = [[NSMutableDictionary alloc]init];

@@ -17,10 +17,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 +(instancetype)getInstance;
 
--(void)startRecord:(NSString*) uuid;
+-(void)startRecordWithName:(NSString*) uuid;
 -(void)stopRecordWithCallBack:(void(^)(NSString* res))callback;
 -(BOOL)isRecording;
 -(void)cancel;
+-(void)pause;
 @end
 
 NS_ASSUME_NONNULL_END
