@@ -9,12 +9,12 @@
 NS_ASSUME_NONNULL_BEGIN
 typedef NS_ENUM(NSInteger,OBJ_TYPE)
 {
-    NONE            = 0,    //默认
-    SOUND           = 1,    //声音
-    SHOP            = 2,    //商店
-    HELP_MESSAGE    = 3,    //求助
-    TREASURE_CHEST  = 4,    //宝箱
-    OTHER_USER      = 5     //其他用户
+    T_NONE            = 0,    //默认
+    T_SOUND           = 1,    //声音
+    T_SHOP            = 2,    //商店
+    T_HELP_MESSAGE    = 3,    //求助
+    T_TREASURE_CHEST  = 4,    //宝箱
+    T_OTHER_USER      = 5     //其他用户
 };
 @protocol MS_LocationObject_Protocol <NSObject>
 

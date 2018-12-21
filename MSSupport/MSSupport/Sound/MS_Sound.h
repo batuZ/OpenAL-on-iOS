@@ -10,12 +10,37 @@
 #import "MSLocationObject.h"
 
 NS_ASSUME_NONNULL_BEGIN
+
+struct MS_SoundInfmation {
+    NSTimeInterval timeLength;
+    int audioSize;
+    int freq;
+    int format;
+    int channels;
+    int bits;
+    void* audioData;
+};
+typedef struct MS_SoundInfmation MS_SoundInfmation;
+
+@protocol MS_Sound_Delegate <NSObject>
+
+-(void)PlayProgress:(float) progress;
+
+@end
+
+
 @interface MS_Sound : MSLocationObject
+@property (nonatomic,weak) id<MS_Sound_Delegate> delegate;
+@property (nonatomic,readonly) MS_SoundInfmation msinfo;
+
+-(instancetype)initWithFile:(NSString*)filePath;
 
 #pragma mark - Play
 -(BOOL)PlayWhithBlock:(void(^)(void))finished;
 -(BOOL)pausePlay;
 -(BOOL)StopPlay_Clear;
+
+
 
 #pragma mark - Record
 -(BOOL)Record;

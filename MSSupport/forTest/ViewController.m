@@ -18,7 +18,8 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    sound = [[MS_Sound alloc]init];
+    sound = [[MS_Sound alloc] init];
+  
 }
 - (IBAction)playTest:(id)sender {
     [sound PlayWhithBlock:^{
@@ -43,5 +44,21 @@
 - (IBAction)recordCancelTest:(id)sender {
     [sound CancelRecord];
 }
+
+- (IBAction)save:(id)sender {
+    MS_Sound *a = [MS_Sound new];
+    MS_Sound *b = [[MS_Sound alloc] init];
+    MS_Sound *c = [[MS_Sound alloc]init];
+    
+    [MS_Sound.locObjects setObject:a forKey:a.uuid];
+    [MS_Sound.locObjects setObject:b forKey:b.uuid];
+    [MS_Sound.locObjects setObject:c forKey:c.uuid];
+    
+    [MS_Sound saveALL];
+}
+- (IBAction)load:(id)sender {
+    NSLog(@"%@",MS_Sound.locObjects);
+}
+
 
 @end

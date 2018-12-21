@@ -8,6 +8,10 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface MSLocationObject : NSObject <MS_LocationObject_Protocol,NSCoding>
+{
+@protected
+    OBJ_TYPE _type;
+}
 //加载进内存的对象集合
 @property (class, nonatomic, readonly)  NSMutableDictionary* locObjects;
 //子类共用的目录属性
@@ -22,12 +26,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly)  NSString*               createDateStr;
 @property (nonatomic, strong)    NSString*               address;
 
-//创建新对象
--(instancetype)initWithType:(OBJ_TYPE)type;
 //读取已有对象到内存
 -(instancetype)initWithUUID:(NSString*)uuid Location:(CLLocationCoordinate2D)coordinate TYPE:(OBJ_TYPE)type date:(NSTimeInterval)date;
-//禁用原构造函数
--(instancetype)init __attribute__((deprecated));
 
 +(BOOL)saveALL;
 

@@ -3,27 +3,148 @@
 #import "LameSupport.h"
 #import <AVFoundation/AVFoundation.h>
 
-@interface MS_Sound()
+@implementation MS_Sound
 {
     ALuint sid,bid;
     AVAudioRecorder* _msRecorder;
+    NSMutableDictionary* _recorderSetting; // 设置录音机
+    MS_SoundInfmation _msinfo;
+    NSString* localPath;
 }
-@property (nonatomic,readonly) NSString* mp3Path;
-@property (nonatomic,readonly) NSString* wavPath;
-@property (nonatomic,strong) NSMutableDictionary* recorderSetting; // 设置录音机
-@end
-
-@implementation MS_Sound
-
+#pragma mark - getters
+// 返回沙盒中Temp/Sounds与wav文件的组合路径
+-(NSString*)mp3Path{
+    if(localPath&&[[NSFileManager defaultManager] fileExistsAtPath:localPath]){
+        return localPath;
+    }else{
+        NSString* dir = [MS_Sound.cachesDir stringByAppendingString:@"DIR_SOUNDS/"];
+        if(![[NSFileManager defaultManager] fileExistsAtPath:dir])
+            [[NSFileManager defaultManager] createDirectoryAtPath:dir withIntermediateDirectories:YES attributes:nil error:nil];
+        NSString* name = [NSString stringWithFormat:@"%@.mp3",self.uuid];
+        return [dir stringByAppendingString:name];
+    }
+}
+-(NSString*)wavPath{
+    NSString* dir = [MS_Sound.tempDir stringByAppendingString:@"DIR_SOUNDS/"];
+    if(![[NSFileManager defaultManager] fileExistsAtPath:dir])
+        [[NSFileManager defaultManager] createDirectoryAtPath:dir withIntermediateDirectories:YES attributes:nil error:nil];
+    NSString* name = [NSString stringWithFormat:@"%@.wav",self.uuid];
+    return [dir stringByAppendingString:name];
+}
+-(NSMutableDictionary*)recorderSetting{
+    if(_recorderSetting == nil){
+        _recorderSetting = [[NSMutableDictionary alloc]init];
+        //设置录制音频的格式
+        [_recorderSetting setObject:@(kAudioFormatLinearPCM) forKey:AVFormatIDKey];
+        
+        //设置录制音频的采样率，8000是电话采样率，对于一般录音已经够了
+        [_recorderSetting setObject:@(44100) forKey:AVSampleRateKey];
+        
+        //设置录制音频的通道数,1声道
+        [_recorderSetting setObject:@(2) forKey:AVNumberOfChannelsKey];
+        
+        //每个采样点位数,分为8、16、24、32
+        [_recorderSetting setObject:@(16) forKey:AVLinearPCMBitDepthKey];
+        
+        //设置录制音频采用高位优先的记录格式
+        //[_recorderSetting setObject:[NSNumber numberWithBool:YES] forKey:AVLinearPCMIsBigEndianKey];
+        
+        //设置采样信号采用浮点数
+        //[_recorderSetting setObject:[NSNumber numberWithBool:YES]forKey:AVLinearPCMIsFloatKey];
+        
+        [_recorderSetting setObject:@(AVAudioQualityMin) forKey:AVEncoderAudioQualityKey];
+    }
+    return _recorderSetting;
+}
+-(MS_SoundInfmation)msinfo{
+    if(_msinfo.audioData == nil && [[NSFileManager defaultManager] fileExistsAtPath:self.mp3Path]){
+        _msinfo.audioData = [OpenALSupport GetAudioDataWithPath:self.mp3Path outDataSize:&_msinfo.audioSize outDataFormat:&_msinfo.format outSampleRate:&_msinfo.freq];
+        if(_msinfo.audioData){
+            _msinfo.channels = _msinfo.format == AL_FORMAT_STEREO8 || _msinfo.format == AL_FORMAT_STEREO16 ? 2 : 1;
+            _msinfo.bits =  _msinfo.format == AL_FORMAT_MONO8 || _msinfo.format == AL_FORMAT_STEREO8 ? 8 : 16;
+            _msinfo.timeLength = _msinfo.audioSize / _msinfo.freq / _msinfo.channels /(_msinfo.bits / 8);
+        }
+    }
+    return _msinfo;
+}
+#pragma mark - init
+- (instancetype)init{
+    self = [super init];
+    if(self){
+        _type = T_SOUND;
+    }
+    return self;
+}
+-(instancetype)initWithFile:(NSString*)filePath{
+    self = [super init];
+    if(self){
+        _type = T_SOUND;
+        localPath = filePath;
+    }
+    return self;
+}
 #pragma mark - Play
 -(BOOL)PlayWhithBlock:(void(^)(void))finished{
+    //文件存在并读取成功，确认环境已初始化
+    if(self.msinfo.audioData && [OpenALSupport initAL]){
+        // 0 未创建
+        // AL_INITIAL 未播放
+        // AL_STOPPED 完成播放
+        // AL_PAUSED 暂停
+        // AL_PLAYING 正在播放
+        ALenum sourceState = [self getSourceState];
+        if(sourceState == AL_NONE || sourceState == AL_STOPPED){//未载入，或播放完被清理
+            alGenBuffers(1, &bid);
+            alGenSources(1, &sid);
+            
+            //数据不会在缓冲区中复制，因此在删除缓冲区之前无法释放数据，用来在外部管理data
+            [OpenALSupport alBufferDataStatic_BufferID:bid format:self.msinfo.format data:self.msinfo.audioData size:self.msinfo.audioSize freq:self.msinfo.freq];
+            
+            alSourcei(sid, AL_BUFFER, bid);
+            
+            ALenum  err = alGetError();
+            if(err != AL_NO_ERROR) {
+                err =alGetError();
+                ALog("AL_ERROR = %d",err);
+                return NO;
+            }
+        }else if (sourceState == AL_PLAYING){
+            return YES;//正在播放
+        }
+        alSourcePlay(sid);// AL_INITIAL|AL_PAUSED 时直接播放
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),^{
+            ALenum state;
+            ALfloat time;
+            do{
+                [NSThread sleepForTimeInterval:0.1f];
+                alGetSourcei(self->sid, AL_SOURCE_STATE, &state);
+                ALog("AL_PLAYING...");
+                
+                alGetSourcef(self->sid, AL_BYTE_OFFSET, &time);
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    if([self.delegate respondsToSelector:@selector(PlayProgress:)]){
+                        [self.delegate PlayProgress:time/self->_msinfo.audioSize];
+                    }
+                });
+            }while(state == AL_PLAYING);
+            ALog("AL_PLAYING finished or puased");
+            finished();
+            [OpenALSupport closeAL];
+        });
+        return YES;
+    }
+    else{
+        ALog("文件不存在或初始化环境失败。");
+        return NO;
+    }
+}
+-(BOOL)PlayWhithBlock_bak:(void(^)(void))finished{
     ALsizei audioSize,freq;
     ALenum format;
     ALenum err;
     
     if([[NSFileManager defaultManager] fileExistsAtPath:self.mp3Path]    //文件存在
        && [OpenALSupport initAL]){                                  //确认环境已初始化
-        
         //判断源状态
         // 0 未创建
         // AL_INITIAL 未播放
@@ -63,6 +184,7 @@
             }while(state == AL_PLAYING);
             ALog("AL_PLAYING finished or puased");
             finished();
+            [OpenALSupport closeAL];
         });
         return YES;
     }
@@ -96,7 +218,6 @@
         return NO;
     }
 }
-
 
 #pragma mark - Record
 -(BOOL)Record{
@@ -164,46 +285,4 @@
     return s;
 }
 
-#pragma mark - getters
-// 返回沙盒中Temp/Sounds与wav文件的组合路径
--(NSString*)mp3Path{
-    
-    NSString* dir = [MS_Sound.cachesDir stringByAppendingString:@"DIR_SOUNDS/"];
-    if(![[NSFileManager defaultManager] fileExistsAtPath:dir])
-        [[NSFileManager defaultManager] createDirectoryAtPath:dir withIntermediateDirectories:YES attributes:nil error:nil];
-    NSString* name = [NSString stringWithFormat:@"%@.mp3",self.uuid];
-    return [dir stringByAppendingString:name];
-}
--(NSString*)wavPath{
-    NSString* dir = [MS_Sound.tempDir stringByAppendingString:@"DIR_SOUNDS/"];
-    if(![[NSFileManager defaultManager] fileExistsAtPath:dir])
-        [[NSFileManager defaultManager] createDirectoryAtPath:dir withIntermediateDirectories:YES attributes:nil error:nil];
-    NSString* name = [NSString stringWithFormat:@"%@.wav",self.uuid];
-    return [dir stringByAppendingString:name];
-}
--(NSMutableDictionary*)recorderSetting{
-    if(_recorderSetting == nil){
-        _recorderSetting = [[NSMutableDictionary alloc]init];
-        //设置录制音频的格式
-        [_recorderSetting setObject:@(kAudioFormatLinearPCM) forKey:AVFormatIDKey];
-        
-        //设置录制音频的采样率，8000是电话采样率，对于一般录音已经够了
-        [_recorderSetting setObject:@(44100) forKey:AVSampleRateKey];
-        
-        //设置录制音频的通道数,1声道
-        [_recorderSetting setObject:@(2) forKey:AVNumberOfChannelsKey];
-        
-        //每个采样点位数,分为8、16、24、32
-        [_recorderSetting setObject:@(16) forKey:AVLinearPCMBitDepthKey];
-        
-        //设置录制音频采用高位优先的记录格式
-        //[_recorderSetting setObject:[NSNumber numberWithBool:YES] forKey:AVLinearPCMIsBigEndianKey];
-        
-        //设置采样信号采用浮点数
-        //[_recorderSetting setObject:[NSNumber numberWithBool:YES]forKey:AVLinearPCMIsFloatKey];
-        
-        [_recorderSetting setObject:@(AVAudioQualityMin) forKey:AVEncoderAudioQualityKey];
-    }
-    return _recorderSetting;
-}
 @end
