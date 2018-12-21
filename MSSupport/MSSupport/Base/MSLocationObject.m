@@ -87,15 +87,7 @@ static NSMutableDictionary* _locObjects = nil;
 
 #pragma mark - functions
 +(BOOL)saveALL{
-    //归档
-    NSMutableData *data = [[NSMutableData alloc] init];
-    //创建归档辅助类
-    NSKeyedArchiver *archiver = [[NSKeyedArchiver alloc] initForWritingWithMutableData:data];
-    //编码
-    [archiver encodeObject:_locObjects forKey:@"_locObjects"];
-    //结束编码
-    [archiver finishEncoding];
-    //写入
+    NSData* data = [NSKeyedArchiver archivedDataWithRootObject:_locObjects];
     return [data writeToFile: MSLocationObject.locaDatalFile atomically:YES];
 }
 
@@ -105,11 +97,7 @@ static NSMutableDictionary* _locObjects = nil;
         ALog("本地文件不存在或读取本地文件错误！");
         return NO;
     }
-    //解档辅助类
-    NSKeyedUnarchiver *unarchiver = [[NSKeyedUnarchiver alloc] initForReadingWithData:data];
-    //解码并解档出model
-    _locObjects = [unarchiver decodeObjectForKey:@"_locObjects"];
-    [unarchiver finishDecoding];
+    _locObjects = [NSKeyedUnarchiver unarchiveObjectWithData:data];
     return YES;
 }
 
