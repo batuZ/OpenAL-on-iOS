@@ -3,7 +3,7 @@
 #else
 #define ALog(...)
 #endif
-
+#define GDKEY @"5e055d702d7c2e49e72632e1d7e36cb6"
 #import <Foundation/Foundation.h>
 
 NS_ASSUME_NONNULL_BEGIN

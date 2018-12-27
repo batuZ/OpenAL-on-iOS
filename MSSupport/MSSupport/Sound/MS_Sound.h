@@ -23,20 +23,24 @@ struct MS_SoundInfmation {
 typedef struct MS_SoundInfmation MS_SoundInfmation;
 
 @protocol MS_Sound_Delegate <NSObject>
-
+@optional
 -(void)PlayProgress:(float) progress;
-
+-(void)PlayFinished;
+-(CLLocation*)updateLisenerLocation;
+-(CLHeading*)updateLisenerHeading;
 @end
 
 
 @interface MS_Sound : MSLocationObject
 @property (nonatomic,weak) id<MS_Sound_Delegate> delegate;
 @property (nonatomic,readonly) MS_SoundInfmation msinfo;
-
+@property (nonatomic,weak) CLLocation * lisener_Location;
+@property (nonatomic,weak) CLHeading * lisener_Heading;
 -(instancetype)initWithFile:(NSString*)filePath;
 
 #pragma mark - Play
--(BOOL)PlayWhithBlock:(void(^)(void))finished;
+//-(BOOL)PlayWhithBlock:(void(^)(void))finished;
+-(BOOL)play;
 -(BOOL)pausePlay;
 -(BOOL)StopPlay_Clear;
 

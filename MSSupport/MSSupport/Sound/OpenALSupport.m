@@ -5,14 +5,20 @@
 
 +(BOOL)initAL{
     ALCcontext *newContext = alcGetCurrentContext();
-    if(!newContext){
+    if(newContext == NULL){
         ALCdevice *newDevice = alcOpenDevice(NULL);
         if (newDevice){
             newContext = alcCreateContext(newDevice, NULL);
             if (newContext){
                 alcMakeContextCurrent(newContext);
-            }else return NO;
-        }else return NO;
+            }else{
+                ALog("initOpenAL: newContext = alcCreateContext(newDevice, NULL) => NULL");
+                return NO;
+            }
+        }else{
+            ALog("initOpenAL: ALCdevice *newDevice = alcOpenDevice(NULL) => NULL");
+            return NO;
+        }
     }
     return YES;
 }
