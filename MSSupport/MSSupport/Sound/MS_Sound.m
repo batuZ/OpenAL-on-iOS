@@ -3,11 +3,11 @@
 #import "LameSupport.h"
 #import <AVFoundation/AVFoundation.h>
 @interface MS_Sound()
-@property(class,nonatomic,readonly) ALuint sid;
+@property(nonatomic,readonly,class) ALuint sid;
 @end
 @implementation MS_Sound
 {
-    ALuint sid, bid;
+    ALuint bid;
     AVAudioRecorder* _msRecorder;
     NSMutableDictionary* _recorderSetting; // 设置录音机
     MS_SoundInfmation _msinfo;
@@ -72,7 +72,10 @@ static  ALuint _sid = AL_NONE;
 }
 +(ALuint)sid{
     if(_sid == AL_NONE){
-        
+        alGenSources(1, &_sid);
+        //距离和衰减
+        alSourcef(_sid,AL_MAX_DISTANCE, 20.0f);
+        alSourcef(_sid,AL_REFERENCE_DISTANCE, 20.0f);
     }
     return _sid;
 }
@@ -95,156 +98,89 @@ static  ALuint _sid = AL_NONE;
 
 #pragma mark - Play
 -(BOOL)play{
-    NSError* err;
     if(self.msinfo.audioData && self.msinfo.audioSize > 0){                 //判断数据是否可用
-        if([[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayAndRecord error:&err]){   //设置 AVAudioSession
-            if([OpenALSupport initAL]){                                       //初始化OpenAL环境
-                ALenum sourceState = [self getSourceState];                 //判断当前source状态
-    
-                switch (sourceState) {
-                    case (AL_NONE):                     //未创建
-                        if([self setupDataToOpenAL]){
-                            ALog("AL_NONE加载数据成功。");
-                        }else{
-                            ALog("AL_NONE加载数据失败。");
-                            return NO;
-                        }
-                        break;
-                        
-                    case AL_STOPPED:                    //播放完成或被用户手动停止，数据被清除
-                        if([self setupDataToOpenAL]){
-                             ALog("AL_STOPPED加载数据成功。");
-                        }else{
-                            ALog("AL_STOPPED加载数据失败。");
-                            return NO;
-                        }
-                        break;
-                        
-                    case AL_INITIAL:                    //数据已加载，还没被播放
-                        //ready for play, do nothing...
-                        ALog("准备播放被未play的source");
-                        break;
-                        
-                    case AL_PAUSED:                     //被用户手动暂停
-                        //ready for play, do nothing...
-                        ALog("准备播放被暂停的source");
-                        break;
-                        
-                    case AL_PLAYING:                    //正在播放
-                        ALog("正在播放中，不能重复执行play");
-                        return YES;
-                        break;
-                        
-                    default:
-                        ALog("一个未知的 sourceState：%d",sourceState);
-                        return NO;
-                        break;
-                }
+        //在这之前必须指定一下 AVAudioSession 的 Category 类型
+        if([OpenALSupport initAL]){                                       //初始化OpenAL环境
+            ALenum sourceState = [self getSourceState];                 //判断当前source状态
+            if(sourceState != AL_PAUSED){
+                [self reSetSource]; // --> AL_INITIAL
+                [self setupData];
+            }
+            
+            alSourcePlay(MS_Sound.sid);
+            
+            // callback delegates
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),^{
+                ALenum state;
+                ALfloat time;
+                do{
+                    [NSThread sleepForTimeInterval:0.1f];
+                    // 监控状态
+                    alGetSourcei(MS_Sound.sid, AL_SOURCE_STATE, &state);
+                    //ALog("AL_PLAYING...");
+                    
+                    //lisener位置更新代理
+                    if([self.delegate respondsToSelector:@selector(updateLisenerLocation)]){
+                        CLLocation* loc = [self.delegate updateLisenerLocation];
+                        alListener3f(AL_POSITION,loc.coordinate.longitude,loc.coordinate.longitude,0);
+                        //ALog("%f, %f",loc.coordinate.longitude,loc.coordinate.latitude);
+                    }
+                    
+                    //lisener方向更新代理
+                    if([self.delegate respondsToSelector:@selector(updateLisenerHeading)]){
+                        CLHeading* head = [self.delegate updateLisenerHeading];
+                        float x = sinf(head.trueHeading*0.0174532925);
+                        float y = cosf(head.trueHeading*0.0174532925);
+                        ALfloat listenerOri[] = {x,y,0,  0,0,1};
+                        //                          ALfloat listenerOri[]={0,1,0,0,0,1}; //面向北，头向上
+                        alListenerfv(AL_ORIENTATION,listenerOri);
+                        // ALog("%f",head.trueHeading);
+                    }
+                    
+                    //播放进度代理
+                    alGetSourcef(MS_Sound.sid, AL_BYTE_OFFSET, &time);
+                    if([self.delegate respondsToSelector:@selector(PlayProgress:)]){
+                        dispatch_async(dispatch_get_main_queue(), ^{[self.delegate PlayProgress:time/self.msinfo.audioSize];});
+                    }
+                }while(state == AL_PLAYING);
                 
-                if(![[AVAudioSession sharedInstance] setActive:YES error:&err]){
-                    ALog("AVAudioSession 会话启动错误：%s",[[err localizedDescription] UTF8String]);
-                }
-                
-                alSourcePlay(sid);
-                
-                // callback delegates
-                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),^{
-                    ALenum state;
-                    ALfloat time;
-                    do{
-                        [NSThread sleepForTimeInterval:0.1f];
-                        // 监控状态
-                        alGetSourcei(self->sid, AL_SOURCE_STATE, &state);
-                        //ALog("AL_PLAYING...");
-          
-                        //lisener位置更新代理
-                        if([self.delegate respondsToSelector:@selector(updateLisenerLocation)]){
-                            CLLocation* loc = [self.delegate updateLisenerLocation];
-                            alListener3f(AL_POSITION,loc.coordinate.longitude,loc.coordinate.longitude,0);
-                            //ALog("%f, %f",loc.coordinate.longitude,loc.coordinate.latitude);
-                        }
-                        
-                        //lisener方向更新代理
-                        if([self.delegate respondsToSelector:@selector(updateLisenerHeading)]){
-                            CLHeading* head = [self.delegate updateLisenerHeading];
-                            float x = sinf(head.trueHeading*0.0174532925);
-                            float y = cosf(head.trueHeading*0.0174532925);
-                            ALfloat listenerOri[] = {x,y,0,  0,0,1};
-//                          ALfloat listenerOri[]={0,1,0,0,0,1}; //面向北，头向上
-                            alListenerfv(AL_ORIENTATION,listenerOri);
-                           // ALog("%f",head.trueHeading);
-                        }
-                        
-                        //播放进度代理
-                        alGetSourcef(self->sid, AL_BYTE_OFFSET, &time);
-                         if([self.delegate respondsToSelector:@selector(PlayProgress:)]){
-                             dispatch_async(dispatch_get_main_queue(), ^{[self.delegate PlayProgress:time/self.msinfo.audioSize];});
-                         }
-                    }while(state == AL_PLAYING);
+                if(state == AL_PAUSED){
+                    ALog("AL_PAUSED!");
+                }else{
                     
                     //播放完毕代理
-                    ALog("AL_PLAYING finished or puased");
                     if([self.delegate respondsToSelector:@selector(PlayFinished)]){
-                        dispatch_async(dispatch_get_main_queue(), ^{[self.delegate PlayFinished];});
+                        dispatch_async(dispatch_get_main_queue(), ^{ [self.delegate PlayFinished]; });
                     }
-                    //清理内存
-                    [OpenALSupport closeAL];
                     
-                    //关闭会话
-                    NSError* err;
-                    if(![[AVAudioSession sharedInstance] setActive:NO error:&err]){
-                        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(audioSessionRouteChange:) name:AVAudioSessionRouteChangeNotification object:nil];
-                        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(audioSessionInterruption:) name:AVAudioSessionInterruptionNotification object:nil];
-                    }else{
-                        ALog("AVAudioSession 会话关闭错误：%s",[[err localizedDescription] UTF8String]);
-                    }
-                });
-                return YES;
-            }else{
-                ALog("初始化OpenAL环境失败。");
-                return NO;
-            }
+                    // 释放数据
+                    [self freeData];
+                    ALog("AL_STOPED!");
+                }
+            });
+            return YES;
         }else{
-            ALog("AVAudioSession 会话设置错误：%s",[[err localizedDescription] UTF8String]);
+            ALog("初始化OpenAL环境失败。");
             return NO;
         }
+        
     }else{
         ALog("文件不存在。");
         return NO;
     }
 }
 -(BOOL)pausePlay{
-    if([self getSourceState] == AL_PLAYING){
-        alSourcePause(sid);
-        return YES;
-    }else{
-        ALog("并没有在播放,不能暂停。");
-        return NO;
-    }
+    alSourcePause(MS_Sound.sid);
+    ALog("已经暂停播放。");
+    return YES;
 }
--(BOOL)StopPlay_Clear{
-    ALenum state = [self getSourceState];
-    if(state == AL_PLAYING || state == AL_PAUSED || state == AL_INITIAL){
-        alSourceStop(sid);                      //停止播放
-        [NSThread sleepForTimeInterval:0.5];
-        alSourcei(sid, AL_BUFFER, 0);           //断开与数据的关联，否则不能释放数据内存
-        alDeleteSources(1, &sid);
-        sid = AL_NONE;
-        alDeleteBuffers(1, &bid);
-        bid = AL_NONE;
-        
-        free(_msinfo.audioData);                //释放数据
-        _msinfo.audioData = nil;
-        
-        [[AVAudioSession sharedInstance] setActive:NO error:nil];   //停止会话
-        [[NSNotificationCenter defaultCenter] removeObserver:self]; //移除所有通知
-         ALog("已经停止播放。");
-        return YES;
-    }else{
-        ALog("并没有加载音频,不能停止。");
-        return NO;
-    }
+-(BOOL)StopPlay{
+    [self freeData];
+    ALog("已经停止播放。");
+    return YES;
 }
+
+
 #pragma mark - Record
 -(BOOL)Record{
     if(_msRecorder && _msRecorder.isRecording){
@@ -262,9 +198,8 @@ static  ALuint _sid = AL_NONE;
             return NO;
         }
         
-        AVAudioSession* session = [AVAudioSession sharedInstance];
-        [session setCategory:AVAudioSessionCategoryPlayAndRecord error:nil];
-        [session setActive:YES error:nil];
+        [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryRecord error:nil];
+        //在这之前必须指定一下 AVAudioSession 的 Category 类型
         return [_msRecorder record];
     }
 }
@@ -306,54 +241,38 @@ static  ALuint _sid = AL_NONE;
     //dB = 20*log(normalizedValue),分贝计算公式
     return pow (10, [_msRecorder averagePowerForChannel:0] / 20);
 }
-#pragma mark - AVAudioSession
--(void)audioSessionInterruption:(NSNotification *)notification{
-    [self StopPlay_Clear];
-    ALog("audioSessionInterruption");
-}
--(void)audioSessionRouteChange:(NSNotification *)notification{
-    [self StopPlay_Clear];
-     ALog("audioSessionRouteChange");
-}
+
 #pragma mark - helpers
 //获取sid状态
 -(ALenum)getSourceState{
     ALenum s = AL_NONE;
-    if(sid)
-        alGetSourcei(sid, AL_SOURCE_STATE, &s);
+    if(MS_Sound.sid)
+        alGetSourcei(MS_Sound.sid, AL_SOURCE_STATE, &s);
     return s;
 }
--(BOOL)setupDataToOpenAL{
-
-    alGenSources(1, &sid);
-    if(alGetError()){
-        ALog("AL_ERROR");
-        return NO;
-    }
-    
-    //sourceSetting
-    alSource3f(sid, AL_POSITION, self.coordinate.longitude,self.coordinate.longitude,10);
-    //距离和衰减
-    alSourcef(sid,AL_MAX_DISTANCE, 20.0f);
-    alSourcef(sid,AL_REFERENCE_DISTANCE, 20.0f);
-    if(alGetError()){
-        ALog("AL_ERROR");
-        return NO;
-    }
-    
+-(void)reSetSource{
+    alSourceRewind(MS_Sound.sid); // stop & move to begin
+    [NSThread sleepForTimeInterval:0.5];
+    alSourcei(MS_Sound.sid, AL_BUFFER, 0); // remove buffer
+}
+-(BOOL)setupData{
+    //sourceLocation
+    alSource3f(MS_Sound.sid, AL_POSITION, self.coordinate.longitude,self.coordinate.longitude,10);
     alGenBuffers(1, &bid);
-    //数据不会在缓冲区中复制，因此在删除缓冲区之前无法释放数据，用来在外部管理data
+    //数据不会在缓冲区中复制，因此在删除缓冲区之前无法释放数据，用来在self.msinfo管理data
     [OpenALSupport alBufferDataStatic_BufferID:bid format:self.msinfo.format data:self.msinfo.audioData size:self.msinfo.audioSize freq:self.msinfo.freq];
-    if(alGetError()){
-        ALog("AL_ERROR");
-        return NO;
-    }
-    
-    alSourcei(sid, AL_BUFFER, bid);
+    alSourcei(MS_Sound.sid, AL_BUFFER, bid);
     if(alGetError()){
         ALog("AL_ERROR");
         return NO;
     }
     return YES;
+}
+-(void)freeData{
+    [self reSetSource];
+    alDeleteBuffers(1, &bid);
+    bid = 0;
+    //释放数据
+    _msinfo = (MS_SoundInfmation){0,0,0,0,0,0,nil};
 }
 @end

@@ -30,7 +30,7 @@
     [sound pausePlay];
 }
 - (IBAction)playStopTest:(id)sender {
-    [sound StopPlay_Clear];
+    [sound StopPlay];
 }
 
 - (IBAction)recordTest:(id)sender {

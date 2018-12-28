@@ -34,15 +34,13 @@ typedef struct MS_SoundInfmation MS_SoundInfmation;
 @interface MS_Sound : MSLocationObject
 @property (nonatomic,weak) id<MS_Sound_Delegate> delegate;
 @property (nonatomic,readonly) MS_SoundInfmation msinfo;
-@property (nonatomic,weak) CLLocation * lisener_Location;
-@property (nonatomic,weak) CLHeading * lisener_Heading;
 -(instancetype)initWithFile:(NSString*)filePath;
 
 #pragma mark - Play
 //-(BOOL)PlayWhithBlock:(void(^)(void))finished;
 -(BOOL)play;
 -(BOOL)pausePlay;
--(BOOL)StopPlay_Clear;
+-(BOOL)StopPlay;
 
 
 
