@@ -2,15 +2,18 @@
 #import "OpenALSupport.h"
 #import "LameSupport.h"
 #import <AVFoundation/AVFoundation.h>
-
+@interface MS_Sound()
+@property(class,nonatomic,readonly) ALuint sid;
+@end
 @implementation MS_Sound
 {
-    ALuint sid,bid;
+    ALuint sid, bid;
     AVAudioRecorder* _msRecorder;
     NSMutableDictionary* _recorderSetting; // 设置录音机
     MS_SoundInfmation _msinfo;
     NSString* localPath;
 }
+static  ALuint _sid = AL_NONE;
 #pragma mark - getters
 // 返回沙盒中Temp/Sounds与wav文件的组合路径
 -(NSString*)mp3Path{
@@ -66,6 +69,12 @@
         }
     }
     return _msinfo;
+}
++(ALuint)sid{
+    if(_sid == AL_NONE){
+        
+    }
+    return _sid;
 }
 #pragma mark - init
 - (instancetype)init{
@@ -138,7 +147,7 @@
                 
                 alSourcePlay(sid);
                 
-                
+                // callback delegates
                 dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),^{
                     ALenum state;
                     ALfloat time;
@@ -151,13 +160,19 @@
                         //lisener位置更新代理
                         if([self.delegate respondsToSelector:@selector(updateLisenerLocation)]){
                             CLLocation* loc = [self.delegate updateLisenerLocation];
-                            ALog("%f, %f",loc.coordinate.longitude,loc.coordinate.latitude);
+                            alListener3f(AL_POSITION,loc.coordinate.longitude,loc.coordinate.longitude,0);
+                            //ALog("%f, %f",loc.coordinate.longitude,loc.coordinate.latitude);
                         }
                         
                         //lisener方向更新代理
                         if([self.delegate respondsToSelector:@selector(updateLisenerHeading)]){
                             CLHeading* head = [self.delegate updateLisenerHeading];
-                            ALog("%f",head.trueHeading);
+                            float x = sinf(head.trueHeading*0.0174532925);
+                            float y = cosf(head.trueHeading*0.0174532925);
+                            ALfloat listenerOri[] = {x,y,0,  0,0,1};
+//                          ALfloat listenerOri[]={0,1,0,0,0,1}; //面向北，头向上
+                            alListenerfv(AL_ORIENTATION,listenerOri);
+                           // ALog("%f",head.trueHeading);
                         }
                         
                         //播放进度代理
@@ -167,7 +182,7 @@
                          }
                     }while(state == AL_PLAYING);
                     
-                    //播放完毕
+                    //播放完毕代理
                     ALog("AL_PLAYING finished or puased");
                     if([self.delegate respondsToSelector:@selector(PlayFinished)]){
                         dispatch_async(dispatch_get_main_queue(), ^{[self.delegate PlayFinished];});
@@ -178,7 +193,6 @@
                     //关闭会话
                     NSError* err;
                     if(![[AVAudioSession sharedInstance] setActive:NO error:&err]){
-                        mark
                         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(audioSessionRouteChange:) name:AVAudioSessionRouteChangeNotification object:nil];
                         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(audioSessionInterruption:) name:AVAudioSessionInterruptionNotification object:nil];
                     }else{
@@ -199,7 +213,6 @@
         return NO;
     }
 }
-
 -(BOOL)pausePlay{
     if([self getSourceState] == AL_PLAYING){
         alSourcePause(sid);
@@ -209,7 +222,6 @@
         return NO;
     }
 }
-
 -(BOOL)StopPlay_Clear{
     ALenum state = [self getSourceState];
     if(state == AL_PLAYING || state == AL_PAUSED || state == AL_INITIAL){
@@ -233,7 +245,6 @@
         return NO;
     }
 }
-
 #pragma mark - Record
 -(BOOL)Record{
     if(_msRecorder && _msRecorder.isRecording){
@@ -295,19 +306,6 @@
     //dB = 20*log(normalizedValue),分贝计算公式
     return pow (10, [_msRecorder averagePowerForChannel:0] / 20);
 }
-
-//更新lisener位置
--(void)updateLisenerLocation{
-    //setLisener
-    alListener3f(AL_POSITION,self.lisener_Location.coordinate.longitude,self.lisener_Location.coordinate.longitude,0);
-    
-    ALfloat listenerOri[]={0,0,-1,0,1,0};
-    alListenerfv(AL_ORIENTATION,listenerOri);
-    ALog("pos: %f, %f;  ori: %f",
-         self.lisener_Location.coordinate.longitude,
-         self.lisener_Location.coordinate.latitude,
-         self.lisener_Heading.trueHeading);
-}
 #pragma mark - AVAudioSession
 -(void)audioSessionInterruption:(NSNotification *)notification{
     [self StopPlay_Clear];
@@ -317,8 +315,6 @@
     [self StopPlay_Clear];
      ALog("audioSessionRouteChange");
 }
-
-
 #pragma mark - helpers
 //获取sid状态
 -(ALenum)getSourceState{
