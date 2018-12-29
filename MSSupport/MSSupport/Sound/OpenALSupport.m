@@ -1,16 +1,16 @@
 #import "OpenALSupport.h"
 #import "MSLocationObject.h"
-
+#import <AVFoundation/AVFoundation.h>
 @implementation OpenALSupport
-
+static ALCcontext *context ;
+static ALCdevice *device ;
 +(BOOL)initAL{
-    ALCcontext *newContext = alcGetCurrentContext();
-    if(newContext == NULL){
-        ALCdevice *newDevice = alcOpenDevice(NULL);
-        if (newDevice){
-            newContext = alcCreateContext(newDevice, NULL);
-            if (newContext){
-                alcMakeContextCurrent(newContext);
+    if(context == NULL){
+        device = alcOpenDevice(NULL);
+        if (device){
+            context = alcCreateContext(device, NULL);
+            if (context){
+                alcMakeContextCurrent(context);
             }else{
                 ALog("initOpenAL: newContext = alcCreateContext(newDevice, NULL) => NULL");
                 return NO;
@@ -22,13 +22,16 @@
     }
     return YES;
 }
+
 +(void)closeAL{
-    ALCcontext *context = alcGetCurrentContext();
-    if(!context){
-        ALCdevice *device = alcGetContextsDevice(context);
-        alcMakeContextCurrent(NULL);
+    alcMakeContextCurrent(NULL);
+    if(context){
         alcDestroyContext(context);
+        context = NULL;
+    }
+    if(device){
         alcCloseDevice(device);
+        device = NULL;
     }
 }
 

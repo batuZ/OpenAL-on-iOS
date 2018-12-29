@@ -8,7 +8,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface OpenALSupport : NSObject
 #pragma mark - 环境
 +(BOOL)initAL;
-+(void)closeAL;
+//+(void)closeAL;
 
 +(void)PlayAudioWithFilepath:(NSString*)filePath finish:(void(^)(void))callBack;
 

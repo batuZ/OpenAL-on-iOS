@@ -60,9 +60,9 @@ static  ALuint _sid = AL_NONE;
     return _recorderSetting;
 }
 -(MS_SoundInfmation)msinfo{
-    if(_msinfo.audioData == nil && [[NSFileManager defaultManager] fileExistsAtPath:self.mp3Path]){
+    if(_msinfo.audioSize == 0 && [[NSFileManager defaultManager] fileExistsAtPath:self.mp3Path]){
         _msinfo.audioData = [OpenALSupport GetAudioDataWithPath:self.mp3Path outDataSize:&_msinfo.audioSize outDataFormat:&_msinfo.format outSampleRate:&_msinfo.freq];
-        if(_msinfo.audioData){
+        if(_msinfo.audioSize > 0){
             _msinfo.channels = _msinfo.format == AL_FORMAT_STEREO8 || _msinfo.format == AL_FORMAT_STEREO16 ? 2 : 1;
             _msinfo.bits =  _msinfo.format == AL_FORMAT_MONO8 || _msinfo.format == AL_FORMAT_STEREO8 ? 8 : 16;
             _msinfo.timeLength = _msinfo.audioSize / _msinfo.freq / _msinfo.channels /(_msinfo.bits / 8);
@@ -75,8 +75,7 @@ static  ALuint _sid = AL_NONE;
         alGenSources(1, &_sid);
         //距离和衰减
         alSourcef(_sid,AL_MAX_DISTANCE, 20.0f);
-        alSourcef(_sid,AL_REFERENCE_DISTANCE, 20.0f);
-    }
+        alSourcef(_sid,AL_REFERENCE_DISTANCE, 20.0f);    }
     return _sid;
 }
 #pragma mark - init
@@ -109,6 +108,11 @@ static  ALuint _sid = AL_NONE;
             
             alSourcePlay(MS_Sound.sid);
             
+            //播放开始代理
+            if(alGetError() == AL_NONE && [self.delegate respondsToSelector:@selector(PlayBegin)]){
+                [self.delegate PlayBegin];
+            }
+            
             // callback delegates
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),^{
                 ALenum state;
@@ -140,7 +144,7 @@ static  ALuint _sid = AL_NONE;
                     //播放进度代理
                     alGetSourcef(MS_Sound.sid, AL_BYTE_OFFSET, &time);
                     if([self.delegate respondsToSelector:@selector(PlayProgress:)]){
-                        dispatch_async(dispatch_get_main_queue(), ^{[self.delegate PlayProgress:time/self.msinfo.audioSize];});
+                        dispatch_async(dispatch_get_main_queue(), ^{[self.delegate PlayProgress:time/self->_msinfo.audioSize];});
                     }
                 }while(state == AL_PLAYING);
                 
@@ -175,6 +179,7 @@ static  ALuint _sid = AL_NONE;
     return YES;
 }
 -(BOOL)StopPlay{
+    alSourceStop(MS_Sound.sid);
     [self freeData];
     ALog("已经停止播放。");
     return YES;

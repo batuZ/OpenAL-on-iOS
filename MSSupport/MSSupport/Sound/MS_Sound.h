@@ -24,8 +24,10 @@ typedef struct MS_SoundInfmation MS_SoundInfmation;
 
 @protocol MS_Sound_Delegate <NSObject>
 @optional
--(void)PlayProgress:(float) progress;
+-(void)PlayBegin;
 -(void)PlayFinished;
+//以下三个代理每秒刷新10次
+-(void)PlayProgress:(float) progress;
 -(CLLocation*)updateLisenerLocation;
 -(CLHeading*)updateLisenerHeading;
 @end
