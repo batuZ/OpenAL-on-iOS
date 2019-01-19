@@ -140,7 +140,7 @@ static ALCdevice *device ;
     
     if (fileFormat.mChannelsPerFrame > 2)
     {
-        ALog("Audio GetAudioData unsupported format, channel count = %u is greater than stereo", fileFormat.mChannelsPerFrame);
+        ALog("Audio GetAudioData unsupported format, channel count = %u is greater than stereo", (unsigned int)fileFormat.mChannelsPerFrame);
         goto label_exit;
     }
     

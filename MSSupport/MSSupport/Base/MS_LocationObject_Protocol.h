@@ -1,9 +1,18 @@
+//全局宏
+
 #ifdef DEBUG
 #define ALog(...) printf("-->%s at %d : ",__FUNCTION__,__LINE__); printf(__VA_ARGS__);printf("\n")
 #else
 #define ALog(...)
 #endif
 #define GDKEY @"5e055d702d7c2e49e72632e1d7e36cb6"
+
+//全局对象
+
+
+
+
+
 #import <Foundation/Foundation.h>
 
 NS_ASSUME_NONNULL_BEGIN
@@ -21,11 +30,8 @@ typedef NS_ENUM(NSInteger,OBJ_TYPE)
 @property(nonatomic, readonly)  NSString*               uuid;
 @property(nonatomic, assign)    CLLocationCoordinate2D  coordinate;
 @property(nonatomic, readonly)  OBJ_TYPE                type;
-//自2001年1月1日00:00起取秒
-@property(nonatomic, readonly)  NSTimeInterval          createDate;
+@property(nonatomic, readonly)  NSInteger               createDate;
 
-@optional
-@property(nonatomic, strong)    NSString*               address;
 @end
 
 NS_ASSUME_NONNULL_END

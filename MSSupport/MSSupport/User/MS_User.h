@@ -7,10 +7,33 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 
 NS_ASSUME_NONNULL_BEGIN
-
+@class MS_Comment;
 @interface MS_User : NSObject
+
+@property(nonatomic,readonly)NSUUID *               userID;                //用户ID，唯一
+
+//公开信息
+@property(nonatomic,strong)NSString*                userName;               //用户昵称
+@property(nonatomic,strong)NSString*               userImage;               //用户头像
+
+//基础信息
+@property(nonatomic,assign)NSInteger                telephong;              //手机号
+@property(nonatomic,strong)NSString*                eMail;                  //邮箱
+@property(nonatomic,assign)BOOL                     isBoy;                  //性别    1-boy 0-girl
+@property(nonatomic,assign)NSInteger                birthday;               //生日    YYYYMMDD
+@property(nonatomic,readonly)NSInteger              userCreateDate;         //用户注册时间
+
+//基础属性
+@property(nonatomic,readonly)CGFloat                rangeHearing;          //听力范围
+@property(nonatomic,readonly)CGFloat                rangeExploration;      //探索范围
+
+//社交信息
+@property(nonatomic,readonly)NSArray<MS_User*>*     friendList;             //好友列表
+@property(nonatomic,readonly)NSArray*               sendoutObjects;         //发布过的内容
+@property(nonatomic,readonly)NSArray<MS_Comment*>*  commentList;            //发布过的评论
 
 @end
 

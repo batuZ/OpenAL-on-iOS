@@ -2,8 +2,12 @@
 
 #import "MSLocationObject.h"
 @interface MSLocationObject()
-@property (nonatomic,strong) NSDateFormatter *formatter;
+//本地文件保存路径
 @property (class, nonatomic, readonly) NSString* locaDatalFile;
+//格式化时间，用于显示
+@property (nonatomic,strong) NSDateFormatter *formatter;
+//创建时间的实体属性
+@property (nonatomic,assign) NSInteger createDate;
 @end
 
 @implementation MSLocationObject
@@ -15,12 +19,12 @@ static NSMutableDictionary* _locObjects = nil;
     if(self){
         _type = T_NONE;
         _uuid = [[NSUUID UUID] UUIDString];
-        _createDate = [NSDate date].timeIntervalSinceReferenceDate;
+        _createDate = [[NSDate date] timeIntervalSince1970];
     }
     return self;
 }
 
-- (instancetype)initWithUUID:(NSString*)uuid Location:(CLLocationCoordinate2D)coordinate TYPE:(OBJ_TYPE)type date:(NSTimeInterval)date{
+- (instancetype)initWithUUID:(NSString*)uuid Location:(CLLocationCoordinate2D)coordinate TYPE:(OBJ_TYPE)type date:(NSInteger)date{
     self = [super init];
     if (self) {
         _uuid       = uuid;
@@ -37,7 +41,7 @@ static NSMutableDictionary* _locObjects = nil;
     [aCoder encodeObject:self.uuid forKey:@"uuid"];
     [aCoder encodeDouble:self.coordinate.longitude forKey:@"longitude"];
     [aCoder encodeDouble:self.coordinate.latitude forKey:@"latitude"];
-    [aCoder encodeDouble:self.createDate forKey:@"createDate"];
+    [aCoder encodeInteger:self.createDate forKey:@"createDate"];
     [aCoder encodeObject:self.address forKey:@"address"];
 }
 
@@ -50,7 +54,7 @@ static NSMutableDictionary* _locObjects = nil;
         coor.latitude = [aDecoder decodeDoubleForKey:@"latitude"];
         coor.longitude = [aDecoder decodeDoubleForKey:@"longitude"];
         self.coordinate = coor;
-        _createDate = [aDecoder decodeDoubleForKey:@"createDate"];
+        _createDate = [aDecoder decodeIntegerForKey:@"createDate"];
         self.address = [aDecoder decodeObjectForKey:@"address"];
     }
     return self;
@@ -118,10 +122,8 @@ static NSMutableDictionary* _locObjects = nil;
 }
 
 #pragma mark - getter
-
-
 -(NSString*)createDateStr{
-    NSDate* date = [NSDate dateWithTimeIntervalSinceReferenceDate:_createDate];
+    NSDate* date = [NSDate dateWithTimeIntervalSince1970:_createDate];
     return [self.formatter stringFromDate:date];
 }
 
