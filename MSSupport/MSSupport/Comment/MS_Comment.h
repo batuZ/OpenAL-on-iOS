@@ -20,6 +20,7 @@ NS_ASSUME_NONNULL_BEGIN
  *  获取的comment,需要传入全部有效参数
  *  新建的comment，applaudCount,createTime都传入0
  */
+
 -(instancetype)initWithUser:(MS_User*)user commentStr:(NSString*)str applaudCount:(NSInteger*) applaudCount createTime:(NSTimeInterval) createTime;
 
 @end
