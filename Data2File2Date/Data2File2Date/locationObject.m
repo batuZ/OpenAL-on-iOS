@@ -12,14 +12,14 @@
 - (void)encodeWithCoder:(nonnull NSCoder *)aCoder {
     [super encodeWithCoder:aCoder];
     [aCoder encodeFloat:_X forKey:@"x"];
-    [aCoder encodeFloat:_Y forKey:@"Y"];
+    [aCoder encodeFloat:_Y forKey:@"y"];
 }
 
 - (nullable instancetype)initWithCoder:(nonnull NSCoder *)aDecoder {
     self = [super initWithCoder:aDecoder];
     if(self){
         _X = [aDecoder decodeFloatForKey:@"x"];
-        _Y = [aDecoder decodeFloatForKey:@"Y"];
+        _Y = [aDecoder decodeFloatForKey:@"y"];
     }
     return self;
 }

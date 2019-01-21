@@ -11,8 +11,10 @@
 
 NS_ASSUME_NONNULL_BEGIN
 @class MS_Comment;
-@interface MS_User : NSObject
-
+@interface MS_User : NSObject<NSCoding>
+@property(nonatomic,strong,class) MS_User*          CurrentUser;            //当前用户，默认为游客
+@property(nonatomic,assign,class) BOOL              isCurrenUserLogin;      //当前用户是否登录
+// 实例属性
 @property(nonatomic,readonly)NSUUID *               userID;                //用户ID，唯一
 
 //公开信息
@@ -34,6 +36,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property(nonatomic,readonly)NSArray<MS_User*>*     friendList;             //好友列表
 @property(nonatomic,readonly)NSArray*               sendoutObjects;         //发布过的内容
 @property(nonatomic,readonly)NSArray<MS_Comment*>*  commentList;            //发布过的评论
+
 
 @end
 
