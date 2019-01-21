@@ -17,7 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 //公开信息
 @property(nonatomic,strong)NSString*                userName;               //用户昵称
-@property(nonatomic,strong)NSString*               userImage;               //用户头像
+@property(nonatomic,strong)UIImage*                 userImage;               //用户头像
 
 //基础信息
 @property(nonatomic,assign)NSInteger                telephong;              //手机号

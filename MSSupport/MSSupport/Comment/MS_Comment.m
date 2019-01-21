@@ -7,9 +7,8 @@
 //
 
 #import "MS_Comment.h"
+#import "MS_GlobalObject.h"
 @interface MS_Comment()
-//格式化时间，用于显示
-@property (nonatomic,strong) NSDateFormatter *formatter;
 //创建时间的实体属性
 @property (nonatomic,assign) NSInteger createTime;
 @end
@@ -32,14 +31,7 @@
 #pragma mark - getter
 -(NSString*)createDateStr{
     NSDate* date = [NSDate dateWithTimeIntervalSince1970:_createTime];
-    return [self.formatter stringFromDate:date];
+    return [g_TimeStrFormatter stringFromDate:date];
 }
 
--(NSDateFormatter*)formatter{
-    if(!_formatter){
-        _formatter = [[NSDateFormatter alloc] init];
-        [_formatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
-    }
-    return _formatter;
-}
 @end

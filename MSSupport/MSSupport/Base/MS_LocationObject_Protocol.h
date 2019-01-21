@@ -1,11 +1,11 @@
 //全局宏
 
-#ifdef DEBUG
-#define ALog(...) printf("-->%s at %d : ",__FUNCTION__,__LINE__); printf(__VA_ARGS__);printf("\n")
-#else
-#define ALog(...)
-#endif
-#define GDKEY @"5e055d702d7c2e49e72632e1d7e36cb6"
+//#ifdef DEBUG
+//#define ALog(...) printf("-->%s at %d : ",__FUNCTION__,__LINE__); printf(__VA_ARGS__);printf("\n")
+//#else
+//#define ALog(...)
+//#endif
+//#define GDKEY @"5e055d702d7c2e49e72632e1d7e36cb6"
 
 //全局对象
 
@@ -25,6 +25,7 @@ typedef NS_ENUM(NSInteger,OBJ_TYPE)
     T_TREASURE_CHEST  = 4,    //宝箱
     T_OTHER_USER      = 5     //其他用户
 };
+
 @protocol MS_LocationObject_Protocol <NSObject>
 
 @property(nonatomic, readonly)  NSString*               uuid;

@@ -20,7 +20,7 @@ static  ALuint _sid = AL_NONE;
     if(localPath&&[[NSFileManager defaultManager] fileExistsAtPath:localPath]){
         return localPath;
     }else{
-        NSString* dir = [MS_Sound.cachesDir stringByAppendingString:@"DIR_SOUNDS/"];
+        NSString* dir = [g_CachesDir stringByAppendingString:@"DIR_SOUNDS/"];
         if(![[NSFileManager defaultManager] fileExistsAtPath:dir])
             [[NSFileManager defaultManager] createDirectoryAtPath:dir withIntermediateDirectories:YES attributes:nil error:nil];
         NSString* name = [NSString stringWithFormat:@"%@.mp3",self.uuid];
@@ -28,7 +28,7 @@ static  ALuint _sid = AL_NONE;
     }
 }
 -(NSString*)wavPath{
-    NSString* dir = [MS_Sound.tempDir stringByAppendingString:@"DIR_SOUNDS/"];
+    NSString* dir = [g_TempDir stringByAppendingString:@"DIR_SOUNDS/"];
     if(![[NSFileManager defaultManager] fileExistsAtPath:dir])
         [[NSFileManager defaultManager] createDirectoryAtPath:dir withIntermediateDirectories:YES attributes:nil error:nil];
     NSString* name = [NSString stringWithFormat:@"%@.wav",self.uuid];
@@ -86,6 +86,7 @@ static  ALuint _sid = AL_NONE;
     }
     return self;
 }
+
 -(instancetype)initWithFile:(NSString*)filePath{
     self = [super init];
     if(self){

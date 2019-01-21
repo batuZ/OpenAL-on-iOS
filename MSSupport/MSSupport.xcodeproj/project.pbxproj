@@ -13,6 +13,8 @@
 		47363C1E21EC78310065D6EE /* MS_Comment.m in Sources */ = {isa = PBXBuildFile; fileRef = 47363C1C21EC78310065D6EE /* MS_Comment.m */; };
 		474BA43521F080860088511F /* MS_Blog.h in Headers */ = {isa = PBXBuildFile; fileRef = 474BA43321F080860088511F /* MS_Blog.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		474BA43621F080860088511F /* MS_Blog.m in Sources */ = {isa = PBXBuildFile; fileRef = 474BA43421F080860088511F /* MS_Blog.m */; };
+		474BA43921F3F41D0088511F /* MS_GlobalObject.h in Headers */ = {isa = PBXBuildFile; fileRef = 474BA43721F3F41D0088511F /* MS_GlobalObject.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		474BA43A21F3F41D0088511F /* MS_GlobalObject.mm in Sources */ = {isa = PBXBuildFile; fileRef = 474BA43821F3F41D0088511F /* MS_GlobalObject.mm */; };
 		4782FE2C21BAC639004656DD /* MS_LocationObject_Protocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 4782FE2B21BAC639004656DD /* MS_LocationObject_Protocol.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		4794696821B2AE51009D4641 /* MSSupport.h in Headers */ = {isa = PBXBuildFile; fileRef = 4794696621B2AE51009D4641 /* MSSupport.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		4794697021B2AFAD009D4641 /* MS_User.h in Headers */ = {isa = PBXBuildFile; fileRef = 4794696E21B2AFAD009D4641 /* MS_User.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -32,6 +34,8 @@
 		47363C1C21EC78310065D6EE /* MS_Comment.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MS_Comment.m; sourceTree = "<group>"; };
 		474BA43321F080860088511F /* MS_Blog.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MS_Blog.h; sourceTree = "<group>"; };
 		474BA43421F080860088511F /* MS_Blog.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MS_Blog.m; sourceTree = "<group>"; };
+		474BA43721F3F41D0088511F /* MS_GlobalObject.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MS_GlobalObject.h; sourceTree = "<group>"; };
+		474BA43821F3F41D0088511F /* MS_GlobalObject.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = MS_GlobalObject.mm; sourceTree = "<group>"; };
 		4782FE2B21BAC639004656DD /* MS_LocationObject_Protocol.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MS_LocationObject_Protocol.h; sourceTree = "<group>"; };
 		4794696321B2AE51009D4641 /* MSSupport.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = MSSupport.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4794696621B2AE51009D4641 /* MSSupport.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSSupport.h; sourceTree = "<group>"; };
@@ -140,9 +144,11 @@
 			children = (
 				4794696721B2AE51009D4641 /* Info.plist */,
 				4794696621B2AE51009D4641 /* MSSupport.h */,
+				4782FE2B21BAC639004656DD /* MS_LocationObject_Protocol.h */,
 				4796FDAB21B37A810007A305 /* MSLocationObject.h */,
 				4796FDAC21B37A810007A305 /* MSLocationObject.m */,
-				4782FE2B21BAC639004656DD /* MS_LocationObject_Protocol.h */,
+				474BA43721F3F41D0088511F /* MS_GlobalObject.h */,
+				474BA43821F3F41D0088511F /* MS_GlobalObject.mm */,
 			);
 			path = Base;
 			sourceTree = "<group>";
@@ -159,6 +165,7 @@
 				4794697021B2AFAD009D4641 /* MS_User.h in Headers */,
 				4782FE2C21BAC639004656DD /* MS_LocationObject_Protocol.h in Headers */,
 				47363C1D21EC78310065D6EE /* MS_Comment.h in Headers */,
+				474BA43921F3F41D0088511F /* MS_GlobalObject.h in Headers */,
 				474BA43521F080860088511F /* MS_Blog.h in Headers */,
 				4796FDAD21B37A810007A305 /* MSLocationObject.h in Headers */,
 				470F14A621B3918F00839E13 /* LameSupport.h in Headers */,
@@ -237,6 +244,7 @@
 				4794697121B2AFAD009D4641 /* MS_User.m in Sources */,
 				474BA43621F080860088511F /* MS_Blog.m in Sources */,
 				4796FDAE21B37A810007A305 /* MSLocationObject.m in Sources */,
+				474BA43A21F3F41D0088511F /* MS_GlobalObject.mm in Sources */,
 				4794698921B2B3A2009D4641 /* OpenALSupport.m in Sources */,
 				4794697521B2AFF6009D4641 /* MS_Sound.m in Sources */,
 				470F14A721B3918F00839E13 /* LameSupport.m in Sources */,

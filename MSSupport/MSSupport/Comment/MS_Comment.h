@@ -13,7 +13,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface MS_Comment : NSObject
 @property(nonatomic,strong)     MS_User*    commentOwner;
 @property(nonatomic,assign)     NSInteger*  applaudCount;
-@property (nonatomic,readonly)  NSString*   createDateStr;
+@property(nonatomic,readonly)   NSString*   createDateStr;
 @property(nonatomic,strong)     NSString*   commentStr;
 
 /*

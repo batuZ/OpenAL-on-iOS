@@ -23,13 +23,16 @@ struct MS_SoundInfmation {
 typedef struct MS_SoundInfmation MS_SoundInfmation;
 
 @protocol MS_Sound_Delegate <NSObject>
+
 @optional
 -(void)PlayBegin;
 -(void)PlayFinished;
+
 //以下三个代理每秒刷新10次
 -(void)PlayProgress:(float) progress;
 -(CLLocation*)updateLisenerLocation;
 -(CLHeading*)updateLisenerHeading;
+
 @end
 
 
@@ -39,18 +42,17 @@ typedef struct MS_SoundInfmation MS_SoundInfmation;
 -(instancetype)initWithFile:(NSString*)filePath;
 
 #pragma mark - Play
-//-(BOOL)PlayWhithBlock:(void(^)(void))finished;
+
 -(BOOL)play;
 -(BOOL)pausePlay;
 -(BOOL)StopPlay;
-
-
 
 #pragma mark - Record
 -(BOOL)Record;
 -(BOOL)PuaseRecord;
 -(BOOL)StopRecordWithBlock:(void(^)(NSString*))finished;
 -(BOOL)CancelRecord;
+
 //获取波形
 -(float)normalizedValue;
 
