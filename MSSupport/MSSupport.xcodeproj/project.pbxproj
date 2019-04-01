@@ -48,7 +48,6 @@
 		4794698721B2B3A2009D4641 /* OpenALSupport.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OpenALSupport.m; sourceTree = "<group>"; };
 		4796FDAB21B37A810007A305 /* MSLocationObject.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSLocationObject.h; sourceTree = "<group>"; };
 		4796FDAC21B37A810007A305 /* MSLocationObject.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSLocationObject.m; sourceTree = "<group>"; };
-		47CC65B221B5244B00C7EBAD /* lame.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = lame.framework; path = "../../../Library/Developer/Xcode/DerivedData/MSSupport-cljyhrfcndkqeqgwcztvoldkxiwq/Build/Products/Debug-iphonesimulator/lame.framework"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -112,7 +111,6 @@
 		47CC65B121B5244A00C7EBAD /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				47CC65B221B5244B00C7EBAD /* lame.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
