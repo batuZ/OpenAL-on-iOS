@@ -17,6 +17,7 @@
 		47864B7221AD064200F8E77B /* lame.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 47864B7121AD064200F8E77B /* lame.framework */; };
 		47864B7521AD11C700F8E77B /* ConvertAudioFile.m in Sources */ = {isa = PBXBuildFile; fileRef = 47864B7321AD11C600F8E77B /* ConvertAudioFile.m */; };
 		4786998321AD3D3D001FAE7D /* OpenALSupport.m in Sources */ = {isa = PBXBuildFile; fileRef = 4786998221AD3D3C001FAE7D /* OpenALSupport.m */; };
+		47C4959B231CDAA8002379B8 /* AL_Recode_ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 47C4959A231CDAA8002379B8 /* AL_Recode_ViewController.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -37,6 +38,8 @@
 		47864B7421AD11C600F8E77B /* ConvertAudioFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConvertAudioFile.h; sourceTree = "<group>"; };
 		4786998121AD3D3C001FAE7D /* OpenALSupport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OpenALSupport.h; path = ../../Hello_AL/HelloAL/OpenALSupport.h; sourceTree = "<group>"; };
 		4786998221AD3D3C001FAE7D /* OpenALSupport.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = OpenALSupport.m; path = ../../Hello_AL/HelloAL/OpenALSupport.m; sourceTree = "<group>"; };
+		47C49599231CDAA8002379B8 /* AL_Recode_ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AL_Recode_ViewController.h; sourceTree = "<group>"; };
+		47C4959A231CDAA8002379B8 /* AL_Recode_ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AL_Recode_ViewController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -82,6 +85,8 @@
 				47864B5B21AD03FB00F8E77B /* LaunchScreen.storyboard */,
 				47864B5E21AD03FB00F8E77B /* Info.plist */,
 				47864B5F21AD03FB00F8E77B /* main.m */,
+				47C49599231CDAA8002379B8 /* AL_Recode_ViewController.h */,
+				47C4959A231CDAA8002379B8 /* AL_Recode_ViewController.m */,
 			);
 			path = AL_Record_lame;
 			sourceTree = "<group>";
@@ -178,6 +183,7 @@
 			files = (
 				47864B7521AD11C700F8E77B /* ConvertAudioFile.m in Sources */,
 				47864B6021AD03FB00F8E77B /* main.m in Sources */,
+				47C4959B231CDAA8002379B8 /* AL_Recode_ViewController.m in Sources */,
 				47864B5221AD03F900F8E77B /* AppDelegate.m in Sources */,
 				47864B6F21AD058900F8E77B /* MS_Recorder.m in Sources */,
 				4786998321AD3D3D001FAE7D /* OpenALSupport.m in Sources */,

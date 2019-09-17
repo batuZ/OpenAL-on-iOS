@@ -10,6 +10,7 @@
 {
     NSString* mp3File;
     NSTimer* tim;
+    ALbyte buffer[22050];
 }
 @property (nonatomic) NSTimeInterval second;
 @property (weak, nonatomic) IBOutlet UILabel *timerLabel;
@@ -86,6 +87,58 @@
     [pointArr addObject:[NSNumber numberWithDouble:peakPowerForChannel]];
     
 }
+
+
+
+- (IBAction)al_recoder:(UIButton *)sender {
+    [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayAndRecord error:nil];
+    [[AVAudioSession sharedInstance] setActive:YES error:nil];
+    
+    const int SRATE = 44100;
+    const int SSIZE = 1024;
+    
+    ALbyte buffer[22050];
+    ALint sample;
+    
+     alGetError();
+     ALCdevice *device = alcCaptureOpenDevice("asdf", SRATE, AL_FORMAT_STEREO16, SSIZE);
+    if (alGetError() != AL_NO_ERROR) {
+        return ;
+    }
+     alcCaptureStart(device);
+    
+    
+    while (true) {
+        alcGetIntegerv(device, ALC_CAPTURE_SAMPLES, (ALCsizei)sizeof(ALint), &sample);
+        alcCaptureSamples(device, (ALCvoid *)buffer, sample);
+        // ... do something with the buffer
+    }
+    
+    
+}
+- (IBAction)al_stop:(id)sender {
+    ALCdevice *device = alcOpenDevice("asdf");
+    alcCaptureStop(device);
+    alcCaptureCloseDevice(device);
+    
+//
+//    ALenum format = AL_FORMAT_STEREO16;
+//    ALsizei freq = 44100;
+//    ALuint bid, sid;
+//    alGenBuffers(1, &bid);
+//    [OpenALSupport alBufferDataStatic_BufferID:bid format:format data:buffer size:22050 freq:freq];
+//    alGenSources(1, &sid);
+//    alSourcei(sid, AL_BUFFER, bid);
+//    alSourcePlay(sid);
+//
+//    ALint state;
+//    do{
+//        alGetSourcei(sid, AL_SOURCE_STATE, &state);
+//        sleep(1);
+//    }while(state == AL_PLAYING);
+}
+
+
 /**
 -(void)cut:(NSString*)filePath res:(NSString*)resultPath{
     //AVURLAsset是AVAsset的子类,AVAsset类专门用于获取多媒体的相关信息,包括获取多媒体的画面、声音等信息.而AVURLAsset子类的作用则是根据NSURL来初始化AVAsset对象.
